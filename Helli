@@ -1,6 +1,7 @@
 --[[
-	Script Name: Full-Detail ClemonFemale + R34 Body Toggle & Action Menu (Fixed)
+	Script Name: Full-Detail R6 Sensual Actions Menu
 	Target Rig: R6
+	Description: Giao diện menu tối giản tích hợp đầy đủ 4 hành động R6 với độ chi tiết và độ mượt tối đa.
 --]]
 
 local Players = game:GetService("Players")
@@ -8,199 +9,15 @@ local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 
-local Function = {}
-
--- TOÀN BỘ 100% DỮ LIỆU CẤU HÌNH GỐC
-function Function.PartListDefault()	
-	return {
-		ClemonFemale = {
-			Limbs = {
-				["Left Leg"] = {
-					["Instance"] = "Mesh",
-					["MeshId"] = "rbxassetid://6870651596",
-					["Function"] = {},
-					["Transparency"] = 0,
-					["Name"] = "Left Leg",
-					["Parent"] = { [1] = "Left Leg" },
-					["Joint"] = {
-						["Part0"] = "Left Leg",
-						["CFrame"] = {
-							["Rotation"] = { ["y"] = 90.00000933466734, ["x"] = -0, ["z"] = 0 },
-							["Position"] = { ["y"] = 0.12550246715545654, ["x"] = -0.03792572021484375, ["z"] = 0.01025390625 }
-						},
-						["CFrame1"] = {
-							["Rotation"] = { ["y"] = 0, ["x"] = -0, ["z"] = 0 },
-							["Position"] = { ["y"] = 0, ["x"] = 0, ["z"] = 0 }
-						}
-					},
-					["Material"] = Enum.Material.SmoothPlastic,
-					["Shape"] = Enum.PartType.Block,
-					["Size"] = { ["y"] = 2.292320728302002, ["x"] = 1.087515950202942, ["z"] = 1.2521870136260986 }
-				},
-				["Right Leg"] = {
-					["Instance"] = "Mesh",
-					["MeshId"] = "rbxassetid://6870651384",
-					["Function"] = {},
-					["Transparency"] = 0,
-					["Name"] = "Right Leg",
-					["Parent"] = { [1] = "Right Leg" },
-					["Joint"] = {
-						["Part0"] = "Right Leg",
-						["CFrame"] = {
-							["Rotation"] = { ["y"] = 90.00000933466734, ["x"] = -0, ["z"] = 0 },
-							["Position"] = { ["y"] = 0.12545979022979736, ["x"] = 0.048073768615722656, ["z"] = 0.0102691650390625 }
-						},
-						["CFrame1"] = {
-							["Rotation"] = { ["y"] = 0, ["x"] = -0, ["z"] = 0 },
-							["Position"] = { ["y"] = 0, ["x"] = 0, ["z"] = 0 }
-						}
-					},
-					["Material"] = Enum.Material.SmoothPlastic,
-					["Shape"] = Enum.PartType.Block,
-					["Size"] = { ["y"] = 2.292334794998169, ["x"] = 1.0879312753677368, ["z"] = 1.207716941833496 }
-				},
-				["TorsoMesh"] = {
-					["Instance"] = "Mesh",
-					["MeshId"] = "rbxassetid://13755434958",
-					["Color"] = "Base",
-					["Function"] = {},
-					["Transparency"] = 1,
-					["Name"] = "TorsoMesh",
-					["Parent"] = { [1] = "Torso" },
-					["Joint"] = {
-						["Part0"] = "Torso",
-						["CFrame"] = {
-							["Rotation"] = { ["y"] = 179.999991348578, ["x"] = -6.362426808311495e-10, ["z"] = -0.00009387990064223813 },
-							["Position"] = { ["y"] = 0.05200004577636719, ["x"] = 0, ["z"] = 0 }
-						},
-						["CFrame1"] = {
-							["Rotation"] = { ["y"] = 0, ["x"] = -0, ["z"] = 0 },
-							["Position"] = { ["y"] = 0, ["x"] = 0, ["z"] = 0 }
-						}
-					},
-					["Material"] = Enum.Material.SmoothPlastic,
-					["Shape"] = Enum.PartType.Block,
-					["Size"] = { ["y"] = 1.998084545135498, ["x"] = 2.077857255935669, ["z"] = 0.966502845287323 }
-				},
-			},
-			Vaginas = {
-				Closed = {
-					["[A] Vagina"] = {
-						["Instance"] = "Part",
-						["Color"] = 0.9973507482925269,
-						["Parent"] = { [1] = "Closed" },
-						["Function"] = {},
-						["Transparency"] = 0,
-						["Name"] = "[A] Vagina",
-						["Mesh"] = {
-							["Scale"] = { ["y"] = 1.0099999904632568, ["x"] = 0.20000000298023224, ["z"] = 1.0099999904632568 },
-							["MeshId"] = "",
-							["MeshType"] = Enum.MeshType.Sphere,
-							["TextureId"] = ""
-						},
-						["Joint"] = {
-							["Part0"] = "Closed",
-							["CFrame"] = {
-								["Rotation"] = { ["y"] = 0.00010906826101211563, ["x"] = -64.00065520239285, ["z"] = 179.99988206555128 },
-								["Position"] = { ["y"] = -1.1307519674301147, ["x"] = -0.0013651847839355469, ["z"] = -0.07950592041015625 }
-							},
-							["CFrame1"] = {
-								["Rotation"] = { ["y"] = 0, ["x"] = -0, ["z"] = 0 },
-								["Position"] = { ["y"] = 0, ["x"] = 0, ["z"] = 0 }
-							}
-						},
-						["Material"] = Enum.Material.SmoothPlastic,
-						["Shape"] = Enum.PartType.Block,
-						["Size"] = { ["y"] = 0.6525917053222656, ["x"] = 0.4109848141670227, ["z"] = 0.452888548374176 }
-					}
-				}
-			},
-			Breasts = {
-				["BreastsRoot"] = {
-					["Instance"] = "Part",
-					["Color"] = "Base",
-					["Function"] = { "BreastUVPhysics" },
-					["Transparency"] = 1,
-					["Name"] = "BreastsRoot",
-					["Parent"] = { [1] = "Torso" },
-					["Joint"] = {
-						["Part0"] = "Torso",
-						["CFrame"] = {
-							["Rotation"] = { ["y"] = -0.00001366099063496834, ["x"] = -0.0000034158497759099423, ["z"] = 0.00003756666575756494 },
-							["Position"] = { ["y"] = 0.9002821445465088, ["x"] = 0.000015735626220703125, ["z"] = -0.30001163482666016 }
-						},
-						["CFrame1"] = {
-							["Rotation"] = { ["y"] = -3.2406041899604844e-08, ["x"] = -0.00016904969627534681, ["z"] = -1.2819104782560808e-08 },
-							["Position"] = { ["y"] = -0.016043663024902344, ["x"] = 4.76837158203125e-07, ["z"] = -9.5367431640625e-07 }
-						}
-					},
-					["Material"] = Enum.Material.Plastic,
-					["Shape"] = Enum.PartType.Block,
-					["Size"] = { ["y"] = 0.09399651736021042, ["x"] = 1.8799303770065308, ["z"] = 0.09399651736021042 }
-				}
-			}
-		}
-	}
-end
-
--- KHỞI TẠO GIAO DIỆN 2 BẢNG MENU
+-- Khởi tạo ScreenGui tối giản
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "R34AndActionManager"
+ScreenGui.Name = "R6ActionMenu"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
--- BẢNG 1: BẬT/TẮT THÂN HÌNH R34
-local BodyMenu = Instance.new("Frame")
-BodyMenu.Size = UDim2.new(0, 210, 0, 120)
-BodyMenu.Position = UDim2.new(0, 50, 0, 50)
-BodyMenu.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-BodyMenu.BorderSizePixel = 0
-BodyMenu.Active = true
-BodyMenu.Draggable = true
-BodyMenu.Parent = ScreenGui
-
-local BodyCorner = Instance.new("UICorner")
-BodyCorner.CornerRadius = UDim.new(0, 8)
-BodyCorner.Parent = BodyMenu
-
-local BodyTitle = Instance.new("TextLabel")
-BodyTitle.Size = UDim2.new(1, 0, 0, 35)
-BodyTitle.BackgroundTransparency = 1
-BodyTitle.Text = "Cài Đặt Thân Hình R34"
-BodyTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-BodyTitle.TextSize = 14
-BodyTitle.Font = Enum.Font.SourceSansBold
-BodyTitle.Parent = BodyMenu
-
-local ToggleBodyBtn = Instance.new("TextButton")
-ToggleBodyBtn.Size = UDim2.new(0, 190, 0, 38)
-ToggleBodyBtn.Position = UDim2.new(0, 10, 0, 45)
-ToggleBodyBtn.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
-ToggleBodyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-ToggleBodyBtn.TextSize = 13
-ToggleBodyBtn.Font = Enum.Font.SourceSansBold
-ToggleBodyBtn.Text = "Bật Thân Hình R34: TẮT"
-local ToggleCorner = Instance.new("UICorner")
-ToggleCorner.CornerRadius = UDim.new(0, 6)
-ToggleCorner.Parent = ToggleBodyBtn
-ToggleBodyBtn.Parent = BodyMenu
-
-local isBodyEnabled = false
-ToggleBodyBtn.MouseButton1Click:Connect(function()
-	isBodyEnabled = not isBodyEnabled
-	if isBodyEnabled then
-		ToggleBodyBtn.BackgroundColor3 = Color3.fromRGB(50, 180, 50)
-		ToggleBodyBtn.Text = "Bật Thân Hình R34: BẬT"
-	else
-		ToggleBodyBtn.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
-		ToggleBodyBtn.Text = "Bật Thân Hình R34: TẮT"
-	end
-end)
-
--- BẢNG 2: MENU HÀNH ĐỘNG
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, 230, 0, 300)
-MainFrame.Position = UDim2.new(0, 50, 0, 190)
+MainFrame.Position = UDim2.new(0, 50, 0, 150)
 MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
@@ -214,7 +31,7 @@ UICorner.Parent = MainFrame
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 0, 40)
 Title.BackgroundTransparency = 1
-Title.Text = "Menu Hành Động R6"
+Title.Text = "Menu Hành Động R6 (Chi Tiết)"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 15
 Title.Font = Enum.Font.SourceSansBold
@@ -240,7 +57,11 @@ local function stopCurrentAction()
 		activeConnection = nil
 	end
 	local humanoid = Character:FindFirstChildOfClass("Humanoid")
-	if humanoid then pcall(function() humanoid.PlatformStand = false end) end
+	if humanoid then
+		pcall(function()
+			humanoid.PlatformStand = false
+		end)
+	end
 end
 
 local function playAction(updateFunction)
@@ -257,11 +78,19 @@ local function playAction(updateFunction)
 	local humanoid = Character:FindFirstChildOfClass("Humanoid")
 	
 	if not (torso and leftLeg and rightLeg and rootPart) then return end
-	if humanoid then pcall(function() humanoid.PlatformStand = true end) end
+	
+	if humanoid then
+		pcall(function()
+			humanoid.PlatformStand = true
+		end)
+	end
 	
 	local startTime = tick()
 	activeConnection = RunService.RenderStepped:Connect(function()
-		if not Character or not Character.Parent then stopCurrentAction() return end
+		if not Character or not Character.Parent then
+			stopCurrentAction()
+			return
+		end
 		local t = tick() - startTime
 		updateFunction(t, rootPart, torso, leftLeg, rightLeg, leftArm, rightArm)
 		
@@ -291,55 +120,144 @@ local function createButton(name, actionFunc)
 	btn.Parent = MainFrame
 end
 
--- CÁC HÀNH ĐỘNG
+-- 1. Ngồi Xổm (Giữ nguyên toàn bộ đa tầng nhịp sóng và biên độ chi tiết)
 createButton("Ngồi Xổm", function()
 	playAction(function(t, root, torso, lLeg, rLeg, lArm, rArm)
-		local b, h, s = math.sin(t * 3.2), math.cos(t * 4.8) * 0.12, math.sin(t * 2.1) * 0.08
+		local primaryBreath = math.sin(t * 3.2)
+		local hipBounce = math.cos(t * 4.8) * 0.12
+		local sideSway = math.sin(t * 2.1) * 0.08
+		local microJiggle = math.cos(t * 8.5) * 0.02
 		local rootCF = root.CFrame
-		torso.CFrame = torso.CFrame:Lerp(rootCF * CFrame.new(s, -1.15 + h, -0.2) * CFrame.Angles(math.rad(28 + b * 3), math.rad(s * 15), math.rad(s * 10)), 0.2)
-		lLeg.CFrame = lLeg.CFrame:Lerp(rootCF * CFrame.new(-0.55, -1.55 + (h * 0.5), 0.35) * CFrame.Angles(math.rad(-95 + b * 2), math.rad(22), math.rad(-12)), 0.2)
-		rLeg.CFrame = rLeg.CFrame:Lerp(rootCF * CFrame.new(0.55, -1.55 + (h * 0.5), 0.35) * CFrame.Angles(math.rad(-95 + b * 2), math.rad(-22), math.rad(12)), 0.2)
-		if lArm then lArm.CFrame = lArm.CFrame:Lerp(rootCF * CFrame.new(-0.85, -0.7, 0.4) * CFrame.Angles(math.rad(-45), math.rad(-30), math.rad(25)), 0.2) end
-		if rArm then rArm.CFrame = rArm.CFrame:Lerp(rootCF * CFrame.new(0.85, -0.7, 0.4) * CFrame.Angles(math.rad(-45), math.rad(30), math.rad(-25)), 0.2) end
+
+		local torsoTargetCF = rootCF * CFrame.new(sideSway, -1.15 + hipBounce, -0.2) 
+			* CFrame.Angles(math.rad(28 + primaryBreath * 3), math.rad(sideSway * 15), math.rad(sideSway * 10))
+		torso.CFrame = torso.CFrame:Lerp(torsoTargetCF, 0.2)
+
+		local leftLegTargetCF = rootCF * CFrame.new(-0.55, -1.55 + (hipBounce * 0.5), 0.35) 
+			* CFrame.Angles(math.rad(-95 + primaryBreath * 2), math.rad(22 + microJiggle), math.rad(-12))
+		lLeg.CFrame = lLeg.CFrame:Lerp(leftLegTargetCF, 0.2)
+
+		local rightLegTargetCF = rootCF * CFrame.new(0.55, -1.55 + (hipBounce * 0.5), 0.35) 
+			* CFrame.Angles(math.rad(-95 + primaryBreath * 2), math.rad(-22 - microJiggle), math.rad(12))
+		rLeg.CFrame = rLeg.CFrame:Lerp(rightLegTargetCF, 0.2)
+
+		if lArm then
+			local leftArmTargetCF = rootCF * CFrame.new(-0.85, -0.7 + (primaryBreath * 0.04), 0.4) 
+				* CFrame.Angles(math.rad(-45), math.rad(-30), math.rad(25 + microJiggle * 5))
+			lArm.CFrame = lArm.CFrame:Lerp(leftArmTargetCF, 0.2)
+		end
+
+		if rArm then
+			local rightArmTargetCF = rootCF * CFrame.new(0.85, -0.7 + (primaryBreath * 0.04), 0.4) 
+				* CFrame.Angles(math.rad(-45), math.rad(30), math.rad(-25 - microJiggle * 5))
+			rArm.CFrame = rArm.CFrame:Lerp(rightArmTargetCF, 0.2)
+		end
 	end)
 end)
 
+-- 2. Ngồi Giang Rộng Chân (Giữ nguyên toàn bộ hệ thống mở đùi và ngả lưng)
 createButton("Ngồi Giang Rộng Chân", function()
 	playAction(function(t, root, torso, lLeg, rLeg, lArm, rArm)
-		local b, sw, hs = math.sin(t * 2.8), math.cos(t * 1.9) * 0.05, math.sin(t * 3.5) * 0.04
+		local breathCycle = math.sin(t * 2.8)
+		local torsoSway = math.cos(t * 1.9) * 0.05
+		local hipSway = math.sin(t * 3.5) * 0.04
+		local microJiggle = math.cos(t * 7.2) * 0.015
 		local rootCF = root.CFrame
-		torso.CFrame = torso.CFrame:Lerp(rootCF * CFrame.new(hs, -1.35 + (sw * 0.5), -0.1) * CFrame.Angles(math.rad(-15 + b * 2), math.rad(hs * 10), math.rad(0)), 0.2)
-		lLeg.CFrame = lLeg.CFrame:Lerp(rootCF * CFrame.new(-1.1 + hs, -1.25, 0.65) * CFrame.Angles(math.rad(-25), math.rad(65 + b * 1.5), math.rad(-35)), 0.2)
-		rLeg.CFrame = rLeg.CFrame:Lerp(rootCF * CFrame.new(1.1 + hs, -1.25, 0.65) * CFrame.Angles(math.rad(-25), math.rad(-65 - b * 1.5), math.rad(35)), 0.2)
-		if lArm then lArm.CFrame = lArm.CFrame:Lerp(rootCF * CFrame.new(-1.0, -0.9, -0.4) * CFrame.Angles(math.rad(-30), math.rad(-45), math.rad(-40)), 0.2) end
-		if rArm then rArm.CFrame = rArm.CFrame:Lerp(rootCF * CFrame.new(1.0, -0.9, -0.4) * CFrame.Angles(math.rad(-30), math.rad(45), math.rad(40)), 0.2) end
+
+		local torsoTargetCF = rootCF * CFrame.new(hipSway, -1.35 + (torsoSway * 0.5), -0.1) 
+			* CFrame.Angles(math.rad(-15 + breathCycle * 2), math.rad(hipSway * 10), math.rad(0))
+		torso.CFrame = torso.CFrame:Lerp(torsoTargetCF, 0.2)
+
+		local leftLegTargetCF = rootCF * CFrame.new(-1.1 + hipSway, -1.25, 0.65) 
+			* CFrame.Angles(math.rad(-25), math.rad(65 + breathCycle * 1.5), math.rad(-35))
+		lLeg.CFrame = lLeg.CFrame:Lerp(leftLegTargetCF, 0.2)
+
+		local rightLegTargetCF = rootCF * CFrame.new(1.1 + hipSway, -1.25, 0.65) 
+			* CFrame.Angles(math.rad(-25), math.rad(-65 - breathCycle * 1.5), math.rad(35))
+		rLeg.CFrame = rLeg.CFrame:Lerp(rightLegTargetCF, 0.2)
+
+		if lArm then
+			local leftArmTargetCF = rootCF * CFrame.new(-1.0, -0.9, -0.4) 
+				* CFrame.Angles(math.rad(-30), math.rad(-45), math.rad(-40 + microJiggle * 5))
+			lArm.CFrame = lArm.CFrame:Lerp(leftArmTargetCF, 0.2)
+		end
+
+		if rArm then
+			local rightArmTargetCF = rootCF * CFrame.new(1.0, -0.9, -0.4) 
+				* CFrame.Angles(math.rad(-30), math.rad(45), math.rad(40 - microJiggle * 5))
+			rArm.CFrame = rArm.CFrame:Lerp(rightArmTargetCF, 0.2)
+		end
 	end)
 end)
 
+-- 3. Cúi Người Chổng Mông (Giữ nguyên toàn bộ góc gập và độ nâng hông)
 createButton("Cúi Người Chổng Mông", function()
 	playAction(function(t, root, torso, lLeg, rLeg, lArm, rArm)
-		local b, hr, ss = math.sin(t * 3.0), math.cos(t * 4.2) * 0.08, math.sin(t * 2.0) * 0.05
+		local primaryBreath = math.sin(t * 3.0)
+		local hipRhythm = math.cos(t * 4.2) * 0.08
+		local sideSway = math.sin(t * 2.0) * 0.05
+		local microJiggle = math.cos(t * 8.0) * 0.02
 		local rootCF = root.CFrame
-		torso.CFrame = torso.CFrame:Lerp(rootCF * CFrame.new(ss, -0.65 + hr, -0.85) * CFrame.Angles(math.rad(78 + b * 2), math.rad(ss * 10), math.rad(ss * 15)), 0.2)
-		lLeg.CFrame = lLeg.CFrame:Lerp(rootCF * CFrame.new(-0.6, -1.55, 0.25) * CFrame.Angles(math.rad(-65 + b * 1.5), math.rad(15), math.rad(-10)), 0.2)
-		rLeg.CFrame = rLeg.CFrame:Lerp(rootCF * CFrame.new(0.6, -1.55, 0.25) * CFrame.Angles(math.rad(-65 + b * 1.5), math.rad(-15), math.rad(10)), 0.2)
-		if lArm then lArm.CFrame = lArm.CFrame:Lerp(rootCF * CFrame.new(-0.85, -1.1, 0.7) * CFrame.Angles(math.rad(-75), math.rad(-20), math.rad(-30)), 0.2) end
-		if rArm then rArm.CFrame = rArm.CFrame:Lerp(rootCF * CFrame.new(0.85, -1.1, 0.7) * CFrame.Angles(math.rad(-75), math.rad(20), math.rad(30)), 0.2) end
+
+		local torsoTargetCF = rootCF * CFrame.new(sideSway, -0.65 + hipRhythm, -0.85) 
+			* CFrame.Angles(math.rad(78 + primaryBreath * 2), math.rad(sideSway * 10), math.rad(sideSway * 15))
+		torso.CFrame = torso.CFrame:Lerp(torsoTargetCF, 0.2)
+
+		local leftLegTargetCF = rootCF * CFrame.new(-0.6, -1.55, 0.25) 
+			* CFrame.Angles(math.rad(-65 + primaryBreath * 1.5), math.rad(15), math.rad(-10))
+		lLeg.CFrame = lLeg.CFrame:Lerp(leftLegTargetCF, 0.2)
+
+		local rightLegTargetCF = rootCF * CFrame.new(0.6, -1.55, 0.25) 
+			* CFrame.Angles(math.rad(-65 + primaryBreath * 1.5), math.rad(-15), math.rad(10))
+		rLeg.CFrame = rLeg.CFrame:Lerp(rightLegTargetCF, 0.2)
+
+		if lArm then
+			local leftArmTargetCF = rootCF * CFrame.new(-0.85, -1.1, 0.7) 
+				* CFrame.Angles(math.rad(-75), math.rad(-20), math.rad(-30 + microJiggle * 5))
+			lArm.CFrame = lArm.CFrame:Lerp(leftArmTargetCF, 0.2)
+		end
+
+		if rArm then
+			local rightArmTargetCF = rootCF * CFrame.new(0.85, -1.1, 0.7) 
+				* CFrame.Angles(math.rad(-75), math.rad(20), math.rad(30 - microJiggle * 5))
+			rArm.CFrame = rArm.CFrame:Lerp(rightArmTargetCF, 0.2)
+		end
 	end)
 end)
 
+-- 4. Nằm Ngửa Giang Chân (Giữ nguyên toàn bộ thông số nằm ngửa chi tiết)
 createButton("Nằm Ngửa Giang Chân", function()
 	playAction(function(t, root, torso, lLeg, rLeg, lArm, rArm)
 		local breath = math.sin(t * 3.0) * 0.05
 		local rootCF = root.CFrame
-		torso.CFrame = torso.CFrame:Lerp(rootCF * CFrame.new(0, -2.4 + breath, 0) * CFrame.Angles(math.rad(-90), math.rad(0), math.rad(0)), 0.2)
-		lLeg.CFrame = lLeg.CFrame:Lerp(rootCF * CFrame.new(-0.95, -1.5, -0.6) * CFrame.Angles(math.rad(-40), math.rad(55), math.rad(-30)), 0.2)
-		rLeg.CFrame = rLeg.CFrame:Lerp(rootCF * CFrame.new(0.95, -1.5, -0.6) * CFrame.Angles(math.rad(-40), math.rad(-55), math.rad(30)), 0.2)
-		if lArm then lArm.CFrame = lArm.CFrame:Lerp(rootCF * CFrame.new(-1.2, -1.9, -0.2) * CFrame.Angles(math.rad(-80), math.rad(-20), math.rad(-45)), 0.2) end
-		if rArm then rArm.CFrame = rArm.CFrame:Lerp(rootCF * CFrame.new(1.2, -1.9, -0.2) * CFrame.Angles(math.rad(-80), math.rad(20), math.rad(45)), 0.2) end
+
+		local torsoTargetCF = rootCF * CFrame.new(0, -2.4 + breath, 0) 
+			* CFrame.Angles(math.rad(-90), math.rad(0), math.rad(0))
+		torso.CFrame = torso.CFrame:Lerp(torsoTargetCF, 0.2)
+
+		local leftLegTargetCF = rootCF * CFrame.new(-0.95, -1.5, -0.6) 
+			* CFrame.Angles(math.rad(-40), math.rad(55), math.rad(-30))
+		lLeg.CFrame = lLeg.CFrame:Lerp(leftLegTargetCF, 0.2)
+
+		local rightLegTargetCF = rootCF * CFrame.new(0.95, -1.5, -0.6) 
+			* CFrame.Angles(math.rad(-40), math.rad(-55), math.rad(30))
+		rLeg.CFrame = rLeg.CFrame:Lerp(rightLegTargetCF, 0.2)
+
+		if lArm then
+			local leftArmTargetCF = rootCF * CFrame.new(-1.2, -1.9, -0.2) 
+				* CFrame.Angles(math.rad(-80), math.rad(-20), math.rad(-45))
+			lArm.CFrame = lArm.CFrame:Lerp(leftArmTargetCF, 0.2)
+		end
+
+		if rArm then
+			local rightArmTargetCF = rootCF * CFrame.new(1.2, -1.9, -0.2) 
+				* CFrame.Angles(math.rad(-80), math.rad(20), math.rad(45))
+			rArm.CFrame = rArm.CFrame:Lerp(rightArmTargetCF, 0.2)
+		end
 	end)
 end)
 
+-- Nút dừng hoạt ảnh
 createButton("Dừng / Đứng Lên", function()
 	stopCurrentAction()
 end)
