@@ -1,4 +1,4 @@
--- Rule34 Executor Script (Full)
+-- Rule34 Executor Script (Full - Fixed)
 -- Client-Only | R6 + R15 | English code + Vietnamese menu
 -- Features: Strip, Breasts, Butt, Physics, Many poses, Sex toys (Floor + Wall)
 
@@ -34,7 +34,7 @@ local function getChar()
 	humanoid = character:FindFirstChildOfClass("Humanoid")
 	root = character:FindFirstChild("HumanoidRootPart")
 	if not (humanoid and root) then return false end
-	isR15 = humanoid.RigType == Enum.RigType.R15
+	isR15 = humanoid.RigType == Enum.HumanoidRigType.R15
 	return true
 end
 
@@ -170,6 +170,12 @@ end
 local function stopPose()
 	if poseConn then poseConn:Disconnect() poseConn = nil end
 	state.pose = "None"
+	pcall(function()
+		if humanoid then
+			humanoid.PlatformStand = false
+		end
+	end)
+	notify("Đã reset tư thế")
 end
 
 local function applyPose(name)
@@ -179,13 +185,32 @@ local function applyPose(name)
 		for _, track in ipairs(humanoid:GetPlayingAnimationTracks()) do
 			track:Stop(0)
 		end
+		local animator = humanoid:FindFirstChildOfClass("Animator")
+		if animator then
+			for _, track in ipairs(animator:GetPlayingAnimationTracks()) do
+				track:Stop(0)
+			end
+		end
 	end)
 	state.pose = name
 	notify("Pose: " .. name)
 
 	poseConn = RunService.RenderStepped:Connect(function()
-		if not character or not character.Parent then stopPose() return end
-		local function set(part, cf) if part then part.CFrame = cf end end
+		if not character or not character.Parent or not root then stopPose() return end
+		
+		pcall(function()
+			humanoid.PlatformStand = true
+		end)
+
+		local function set(part, cf) 
+			if part then 
+				part.CFrame = cf 
+				if part:IsA("BasePart") then
+					part.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+					part.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+				end
+			end 
+		end
 
 		if isR15 then
 			local upper = character:FindFirstChild("UpperTorso")
