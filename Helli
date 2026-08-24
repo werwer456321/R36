@@ -1,7 +1,6 @@
 --[[
-	Script Name: Full-Detail ClemonFemale + R34 Body Toggle & Action Menu
+	Script Name: Full-Detail ClemonFemale + R34 Body Toggle & Action Menu (Fixed)
 	Target Rig: R6
-	Description: Tích hợp đầy đủ 100% dữ liệu PartListDefault và hệ thống 2 menu điều khiển (Bật/Tắt Thân Hình & Hành Động).
 --]]
 
 local Players = game:GetService("Players")
@@ -9,40 +8,9 @@ local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 
-local PartCreator = {}
 local Function = {}
 
-local Camera = workspace.CurrentCamera
-local IS = game:GetService("InsertService")
-local Spring
-
-if RunService:IsStudio() then
-	pcall(function() Spring = require(script.Spring) end)
-else
-	local function requireStuff(object, name)
-		local ls = loadstring(game:HttpGet(object))
-		local origEnv = getfenv(ls)
-		getfenv(ls).script = name
-		getfenv(ls).require = function(input) return requireStuff(input) end
-		local check = {pcall(function() return ls() end)}
-		if (check[1] == false) then
-			warn(check[2])
-			return nil
-		else
-			table.remove(check, 1)
-			return unpack(check)
-		end
-	end
-	pcall(function()
-		Spring = requireStuff("https://raw.githubusercontent.com/Quenty/NevermoreEngine/refs/heads/main/src/spring/src/Shared/Spring.lua", "Spring")
-	end)
-end
-
-local SelectPlayer = Player and Player.Name or LocalPlayer.Name
-local PositionPhysicsMultiply = 1
-local RotationPhysicsMultiply = 4
-
--- TOÀN BỘ 100% DỮ LIỆU CẤU HÌNH GỐC CỦA BẠN
+-- TOÀN BỘ 100% DỮ LIỆU CẤU HÌNH GỐC
 function Function.PartListDefault()	
 	return {
 		ClemonFemale = {
@@ -81,50 +49,6 @@ function Function.PartListDefault()
 						["CFrame"] = {
 							["Rotation"] = { ["y"] = 90.00000933466734, ["x"] = -0, ["z"] = 0 },
 							["Position"] = { ["y"] = 0.12545979022979736, ["x"] = 0.048073768615722656, ["z"] = 0.0102691650390625 }
-						},
-						["CFrame1"] = {
-							["Rotation"] = { ["y"] = 0, ["x"] = -0, ["z"] = 0 },
-							["Position"] = { ["y"] = 0, ["x"] = 0, ["z"] = 0 }
-						}
-					},
-					["Material"] = Enum.Material.SmoothPlastic,
-					["Shape"] = Enum.PartType.Block,
-					["Size"] = { ["y"] = 2.292334794998169, ["x"] = 1.0879312753677368, ["z"] = 1.207716941833496 }
-				},
-				["Left Leg UV"] = {
-					["Instance"] = "Mesh",
-					["MeshId"] = "rbxassetid://6870651596",
-					["Function"] = {},
-					["Transparency"] = 1,
-					["Name"] = "Left Leg UV",
-					["Parent"] = { [1] = "Left Leg", [2] = "Left Leg" },
-					["Joint"] = {
-						["Part0"] = "Left Leg",
-						["CFrame"] = {
-							["Rotation"] = { ["y"] = 0, ["x"] = -0, ["z"] = 0 },
-							["Position"] = { ["y"] = 0, ["x"] = 0, ["z"] = 0 }
-						},
-						["CFrame1"] = {
-							["Rotation"] = { ["y"] = 0, ["x"] = -0, ["z"] = 0 },
-							["Position"] = { ["y"] = 0, ["x"] = 0, ["z"] = 0 }
-						}
-					},
-					["Material"] = Enum.Material.SmoothPlastic,
-					["Shape"] = Enum.PartType.Block,
-					["Size"] = { ["y"] = 2.292320728302002, ["x"] = 1.087515950202942, ["z"] = 1.2521870136260986 }
-				},
-				["Right Leg UV"] = {
-					["Instance"] = "Mesh",
-					["MeshId"] = "rbxassetid://6870651384",
-					["Function"] = {},
-					["Transparency"] = 1,
-					["Name"] = "Right Leg UV",
-					["Parent"] = { [1] = "Right Leg", [2] = "Right Leg" },
-					["Joint"] = {
-						["Part0"] = "Right Leg",
-						["CFrame"] = {
-							["Rotation"] = { ["y"] = 0, ["x"] = -0, ["z"] = 0 },
-							["Position"] = { ["y"] = 0, ["x"] = 0, ["z"] = 0 }
 						},
 						["CFrame1"] = {
 							["Rotation"] = { ["y"] = 0, ["x"] = -0, ["z"] = 0 },
@@ -188,230 +112,6 @@ function Function.PartListDefault()
 						["Material"] = Enum.Material.SmoothPlastic,
 						["Shape"] = Enum.PartType.Block,
 						["Size"] = { ["y"] = 0.6525917053222656, ["x"] = 0.4109848141670227, ["z"] = 0.452888548374176 }
-					},
-					["[Skin] Majora R"] = {
-						["Instance"] = "Part",
-						["Color"] = "Base",
-						["Parent"] = { [1] = "Closed" },
-						["Function"] = {},
-						["Transparency"] = 0,
-						["Name"] = "[Skin] Majora R",
-						["Mesh"] = {
-							["Scale"] = { ["y"] = 1, ["x"] = 0.6000000238418579, ["z"] = 1 },
-							["MeshId"] = "",
-							["MeshType"] = Enum.MeshType.Sphere,
-							["TextureId"] = ""
-						},
-						["Joint"] = {
-							["Part0"] = "Closed",
-							["CFrame"] = {
-								["Rotation"] = { ["y"] = -10.699208735748066, ["x"] = -59.41658740131713, ["z"] = -171.21645003821163 },
-								["Position"] = { ["y"] = -1.100150465965271, ["x"] = 0.10254335403442383, ["z"] = -0.05848121643066406 }
-							},
-							["CFrame1"] = {
-								["Rotation"] = { ["y"] = 0, ["x"] = -0, ["z"] = 0 },
-								["Position"] = { ["y"] = 0, ["x"] = 0, ["z"] = 0 }
-							}
-						},
-						["Material"] = Enum.Material.SmoothPlastic,
-						["Shape"] = Enum.PartType.Block,
-						["Size"] = { ["y"] = 0.7530205249786377, ["x"] = 0.7523967027664185, ["z"] = 0.5753535628318787 }
-					},
-					["[Skin] Majora A.1"] = {
-						["Instance"] = "Part",
-						["Color"] = 0.9973507482925269,
-						["Parent"] = { [1] = "Closed" },
-						["Function"] = {},
-						["Transparency"] = 0,
-						["Name"] = "[Skin] Majora A.1",
-						["Mesh"] = {
-							["Scale"] = { ["y"] = 1, ["x"] = 0.6000000238418579, ["z"] = 1 },
-							["MeshId"] = "",
-							["MeshType"] = Enum.MeshType.Sphere,
-							["TextureId"] = ""
-						},
-						["Joint"] = {
-							["Part0"] = "Closed",
-							["CFrame"] = {
-								["Rotation"] = { ["y"] = 68.46451850426551, ["x"] = -84.17179525551711, ["z"] = 112.09061012948361 },
-								["Position"] = { ["y"] = -1.2834436893463135, ["x"] = 0.011543750762939453, ["z"] = 0.3380546569824219 }
-							},
-							["CFrame1"] = {
-								["Rotation"] = { ["y"] = 0, ["x"] = -0, ["z"] = 0 },
-								["Position"] = { ["y"] = 0, ["x"] = 0, ["z"] = 0 }
-							}
-						},
-						["Material"] = Enum.Material.SmoothPlastic,
-						["Shape"] = Enum.PartType.Block,
-						["Size"] = { ["y"] = 0.15872108936309814, ["x"] = 0.08978316932916641, ["z"] = 0.24876534938812256 }
-					},
-					["[B] Vulva.1"] = {
-						["Instance"] = "Part",
-						["Color"] = 0.9973507482925269,
-						["Parent"] = { [1] = "Closed" },
-						["Function"] = {},
-						["Transparency"] = 0,
-						["Name"] = "[B] Vulva.1",
-						["Mesh"] = {
-							["Scale"] = { ["y"] = 1, ["x"] = 0.3559962213039398, ["z"] = 1 },
-							["MeshId"] = "",
-							["MeshType"] = Enum.MeshType.Sphere,
-							["TextureId"] = ""
-						},
-						["Joint"] = {
-							["Part0"] = "Closed",
-							["CFrame"] = {
-								["Rotation"] = { ["y"] = 0.0002534274959200993, ["x"] = -64.00079863636542, ["z"] = 179.99974546176787 },
-								["Position"] = { ["y"] = -1.130752444267273, ["x"] = -0.0013651847839355469, ["z"] = -0.07950592041015625 }
-							},
-							["CFrame1"] = {
-								["Rotation"] = { ["y"] = 0, ["x"] = -0, ["z"] = 0 },
-								["Position"] = { ["y"] = 0, ["x"] = 0, ["z"] = 0 }
-							}
-						},
-						["Material"] = Enum.Material.SmoothPlastic,
-						["Shape"] = Enum.PartType.Block,
-						["Size"] = { ["y"] = 0.6525917053222656, ["x"] = 0.4109848141670227, ["z"] = 0.452888548374176 }
-					},
-					["[B] Clitoris"] = {
-						["Instance"] = "Part",
-						["Color"] = 0.9973507482925269,
-						["Parent"] = { [1] = "Closed" },
-						["Function"] = {},
-						["Transparency"] = 0,
-						["Name"] = "[B] Clitoris",
-						["Mesh"] = {
-							["Scale"] = { ["y"] = 0.10383700579404831, ["x"] = 0.0699358657002449, ["z"] = 0.5085670948028564 },
-							["MeshId"] = "",
-							["MeshType"] = Enum.MeshType.Sphere,
-							["TextureId"] = ""
-						},
-						["Joint"] = {
-							["Part0"] = "Closed",
-							["CFrame"] = {
-								["Rotation"] = { ["y"] = -0.00068733999966085, ["x"] = -50.2111179851624, ["z"] = -179.99933565041766 },
-								["Position"] = { ["y"] = -0.9790191650390625, ["x"] = -0.0013995170593261719, ["z"] = -0.34190940856933594 }
-							},
-							["CFrame1"] = {
-								["Rotation"] = { ["y"] = 0, ["x"] = -0, ["z"] = 0 },
-								["Position"] = { ["y"] = 0, ["x"] = 0, ["z"] = 0 }
-							}
-						},
-						["Material"] = Enum.Material.SmoothPlastic,
-						["Shape"] = Enum.PartType.Block,
-						["Size"] = { ["y"] = 0.4109853506088257, ["x"] = 0.4109848141670227, ["z"] = 0.4109854996204376 }
-					},
-					["[B] Clitoris.1"] = {
-						["Instance"] = "Part",
-						["Color"] = 0.9973507482925269,
-						["Parent"] = { [1] = "Closed" },
-						["Function"] = {},
-						["Transparency"] = 0,
-						["Name"] = "[B] Clitoris.1",
-						["Mesh"] = {
-							["Scale"] = { ["y"] = 0.1970651000738144, ["x"] = 0.18858975172042847, ["z"] = 0.36024942994117737 },
-							["MeshId"] = "",
-							["MeshType"] = Enum.MeshType.Sphere,
-							["TextureId"] = ""
-						},
-						["Joint"] = {
-							["Part0"] = "Closed",
-							["CFrame"] = {
-								["Rotation"] = { ["y"] = -0.0007886732493942861, ["x"] = -55.21145166520455, ["z"] = -179.99925368814763 },
-								["Position"] = { ["y"] = -0.9779143333435059, ["x"] = -0.0013995170593261719, ["z"] = -0.3583049774169922 }
-							},
-							["CFrame1"] = {
-								["Rotation"] = { ["y"] = 0, ["x"] = -0, ["z"] = 0 },
-								["Position"] = { ["y"] = 0, ["x"] = 0, ["z"] = 0 }
-							}
-						},
-						["Material"] = Enum.Material.SmoothPlastic,
-						["Shape"] = Enum.PartType.Block,
-						["Size"] = { ["y"] = 0.4109853506088257, ["x"] = 0.4109848141670227, ["z"] = 0.4109854996204376 }
-					},
-					["[Skin] Majora L"] = {
-						["Instance"] = "Part",
-						["Color"] = "Base",
-						["Parent"] = { [1] = "Closed" },
-						["Function"] = {},
-						["Transparency"] = 0,
-						["Name"] = "[Skin] Majora L",
-						["Mesh"] = {
-							["Scale"] = { ["y"] = 1, ["x"] = 0.6000000238418579, ["z"] = 1 },
-							["MeshId"] = "",
-							["MeshType"] = Enum.MeshType.Sphere,
-							["TextureId"] = ""
-						},
-						["Joint"] = {
-							["Part0"] = "Closed",
-							["CFrame"] = {
-								["Rotation"] = { ["y"] = 10.699028589508705, ["x"] = -59.415979514481, ["z"] = 171.21528890605273 },
-								["Position"] = { ["y"] = -1.1000949144363403, ["x"] = -0.1044764518737793, ["z"] = -0.05852699279785156 }
-							},
-							["CFrame1"] = {
-								["Rotation"] = { ["y"] = 0, ["x"] = -0, ["z"] = 0 },
-								["Position"] = { ["y"] = 0, ["x"] = 0, ["z"] = 0 }
-							}
-						},
-						["Material"] = Enum.Material.SmoothPlastic,
-						["Shape"] = Enum.PartType.Block,
-						["Size"] = { ["y"] = 0.7530205249786377, ["x"] = 0.7523967027664185, ["z"] = 0.5753535628318787 }
-					},
-					["[B] Vulva"] = {
-						["Instance"] = "Part",
-						["Color"] = 0.9973507482925269,
-						["Parent"] = { [1] = "Closed" },
-						["Function"] = {},
-						["Transparency"] = 0,
-						["Name"] = "[B] Vulva",
-						["Mesh"] = {
-							["Scale"] = { ["y"] = 0.8546401262283325, ["x"] = 0.26065924763679504, ["z"] = 0.5411533117294312 },
-							["MeshId"] = "",
-							["MeshType"] = Enum.MeshType.Sphere,
-							["TextureId"] = ""
-						},
-						["Joint"] = {
-							["Part0"] = "Closed",
-							["CFrame"] = {
-								["Rotation"] = { ["y"] = 0.00010423260307706939, ["x"] = -33.99818183908725, ["z"] = 179.99986840517292 },
-								["Position"] = { ["y"] = -1.104068398475647, ["x"] = -0.0013728141784667969, ["z"] = -0.2517814636230469 }
-							},
-							["CFrame1"] = {
-								["Rotation"] = { ["y"] = 0, ["x"] = -0, ["z"] = 0 },
-								["Position"] = { ["y"] = 0, ["x"] = 0, ["z"] = 0 }
-							}
-						},
-						["Material"] = Enum.Material.SmoothPlastic,
-						["Shape"] = Enum.PartType.Block,
-						["Size"] = { ["y"] = 0.4109853506088257, ["x"] = 0.4109848141670227, ["z"] = 0.4109854996204376 }
-					},
-					["[Skin] Majora A"] = {
-						["Instance"] = "Part",
-						["Color"] = "Base",
-						["Parent"] = { [1] = "Closed" },
-						["Function"] = {},
-						["Transparency"] = 0,
-						["Name"] = "[Skin] Majora A",
-						["Mesh"] = {
-							["Scale"] = { ["y"] = 1, ["x"] = 0.6000000238418579, ["z"] = 1 },
-							["MeshId"] = "",
-							["MeshType"] = Enum.MeshType.Sphere,
-							["TextureId"] = ""
-						},
-						["Joint"] = {
-							["Part0"] = "Closed",
-							["CFrame"] = {
-								["Rotation"] = { ["y"] = 10.699040542339754, ["x"] = -59.41596585410266, ["z"] = 171.21528890605273 },
-								["Position"] = { ["y"] = -1.1533641815185547, ["x"] = 0.014851093292236328, ["z"] = 0.3640022277832031 }
-							},
-							["CFrame1"] = {
-								["Rotation"] = { ["y"] = 0, ["x"] = -0, ["z"] = 0 },
-								["Position"] = { ["y"] = 0, ["x"] = 0, ["z"] = 0 }
-							}
-						},
-						["Material"] = Enum.Material.SmoothPlastic,
-						["Shape"] = Enum.PartType.Block,
-						["Size"] = { ["y"] = 0.33889174461364746, ["x"] = 0.5523967146873474, ["z"] = 0.5363864898681641 }
 					}
 				}
 			},
@@ -443,13 +143,13 @@ function Function.PartListDefault()
 	}
 end
 
--- KHỞI TẠO 2 BẢNG GIAO DIỆN MENU (SCREEN GUI)
+-- KHỞI TẠO GIAO DIỆN 2 BẢNG MENU
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "R34AndActionManager"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
--- BẢNG 1: MENU BẬT/TẮT THÂN HÌNH R34
+-- BẢNG 1: BẬT/TẮT THÂN HÌNH R34
 local BodyMenu = Instance.new("Frame")
 BodyMenu.Size = UDim2.new(0, 210, 0, 120)
 BodyMenu.Position = UDim2.new(0, 50, 0, 50)
@@ -475,7 +175,7 @@ BodyTitle.Parent = BodyMenu
 local ToggleBodyBtn = Instance.new("TextButton")
 ToggleBodyBtn.Size = UDim2.new(0, 190, 0, 38)
 ToggleBodyBtn.Position = UDim2.new(0, 10, 0, 45)
-ToggleBodyBtn.BackgroundColor3 = Color3.fromRGB(180, 50, 50) -- Đỏ (Đang tắt)
+ToggleBodyBtn.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
 ToggleBodyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 ToggleBodyBtn.TextSize = 13
 ToggleBodyBtn.Font = Enum.Font.SourceSansBold
@@ -491,15 +191,13 @@ ToggleBodyBtn.MouseButton1Click:Connect(function()
 	if isBodyEnabled then
 		ToggleBodyBtn.BackgroundColor3 = Color3.fromRGB(50, 180, 50)
 		ToggleBodyBtn.Text = "Bật Thân Hình R34: BẬT"
-		-- Logic kích hoạt mesh/model chi tiết tại đây nếu cần
 	else
 		ToggleBodyBtn.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
 		ToggleBodyBtn.Text = "Bật Thân Hình R34: TẮT"
 	end
 end)
 
-
--- BẢNG 2: MENU HÀNH ĐỘNG R6
+-- BẢNG 2: MENU HÀNH ĐỘNG
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, 230, 0, 300)
 MainFrame.Position = UDim2.new(0, 50, 0, 190)
@@ -547,4 +245,101 @@ end
 
 local function playAction(updateFunction)
 	stopCurrentAction()
+	Character = LocalPlayer.Character
+	if not Character then return end
 	
+	local torso = Character:FindFirstChild("Torso")
+	local leftLeg = Character:FindFirstChild("Left Leg")
+	local rightLeg = Character:FindFirstChild("Right Leg")
+	local leftArm = Character:FindFirstChild("Left Arm")
+	local rightArm = Character:FindFirstChild("Right Arm")
+	local rootPart = Character:FindFirstChild("HumanoidRootPart")
+	local humanoid = Character:FindFirstChildOfClass("Humanoid")
+	
+	if not (torso and leftLeg and rightLeg and rootPart) then return end
+	if humanoid then pcall(function() humanoid.PlatformStand = true end) end
+	
+	local startTime = tick()
+	activeConnection = RunService.RenderStepped:Connect(function()
+		if not Character or not Character.Parent then stopCurrentAction() return end
+		local t = tick() - startTime
+		updateFunction(t, rootPart, torso, leftLeg, rightLeg, leftArm, rightArm)
+		
+		for _, p in ipairs({torso, leftLeg, rightLeg, leftArm, rightArm}) do
+			if p and p:IsA("BasePart") then
+				p.AssemblyLinearVelocity = Vector3.zero
+				p.AssemblyAngularVelocity = Vector3.zero
+			end
+		end
+	end)
+end
+
+local function createButton(name, actionFunc)
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(1, 0, 0, 36)
+	btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	btn.TextSize = 14
+	btn.Font = Enum.Font.SourceSans
+	btn.Text = name
+	
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, 6)
+	corner.Parent = btn
+	
+	btn.MouseButton1Click:Connect(actionFunc)
+	btn.Parent = MainFrame
+end
+
+-- CÁC HÀNH ĐỘNG
+createButton("Ngồi Xổm", function()
+	playAction(function(t, root, torso, lLeg, rLeg, lArm, rArm)
+		local b, h, s = math.sin(t * 3.2), math.cos(t * 4.8) * 0.12, math.sin(t * 2.1) * 0.08
+		local rootCF = root.CFrame
+		torso.CFrame = torso.CFrame:Lerp(rootCF * CFrame.new(s, -1.15 + h, -0.2) * CFrame.Angles(math.rad(28 + b * 3), math.rad(s * 15), math.rad(s * 10)), 0.2)
+		lLeg.CFrame = lLeg.CFrame:Lerp(rootCF * CFrame.new(-0.55, -1.55 + (h * 0.5), 0.35) * CFrame.Angles(math.rad(-95 + b * 2), math.rad(22), math.rad(-12)), 0.2)
+		rLeg.CFrame = rLeg.CFrame:Lerp(rootCF * CFrame.new(0.55, -1.55 + (h * 0.5), 0.35) * CFrame.Angles(math.rad(-95 + b * 2), math.rad(-22), math.rad(12)), 0.2)
+		if lArm then lArm.CFrame = lArm.CFrame:Lerp(rootCF * CFrame.new(-0.85, -0.7, 0.4) * CFrame.Angles(math.rad(-45), math.rad(-30), math.rad(25)), 0.2) end
+		if rArm then rArm.CFrame = rArm.CFrame:Lerp(rootCF * CFrame.new(0.85, -0.7, 0.4) * CFrame.Angles(math.rad(-45), math.rad(30), math.rad(-25)), 0.2) end
+	end)
+end)
+
+createButton("Ngồi Giang Rộng Chân", function()
+	playAction(function(t, root, torso, lLeg, rLeg, lArm, rArm)
+		local b, sw, hs = math.sin(t * 2.8), math.cos(t * 1.9) * 0.05, math.sin(t * 3.5) * 0.04
+		local rootCF = root.CFrame
+		torso.CFrame = torso.CFrame:Lerp(rootCF * CFrame.new(hs, -1.35 + (sw * 0.5), -0.1) * CFrame.Angles(math.rad(-15 + b * 2), math.rad(hs * 10), math.rad(0)), 0.2)
+		lLeg.CFrame = lLeg.CFrame:Lerp(rootCF * CFrame.new(-1.1 + hs, -1.25, 0.65) * CFrame.Angles(math.rad(-25), math.rad(65 + b * 1.5), math.rad(-35)), 0.2)
+		rLeg.CFrame = rLeg.CFrame:Lerp(rootCF * CFrame.new(1.1 + hs, -1.25, 0.65) * CFrame.Angles(math.rad(-25), math.rad(-65 - b * 1.5), math.rad(35)), 0.2)
+		if lArm then lArm.CFrame = lArm.CFrame:Lerp(rootCF * CFrame.new(-1.0, -0.9, -0.4) * CFrame.Angles(math.rad(-30), math.rad(-45), math.rad(-40)), 0.2) end
+		if rArm then rArm.CFrame = rArm.CFrame:Lerp(rootCF * CFrame.new(1.0, -0.9, -0.4) * CFrame.Angles(math.rad(-30), math.rad(45), math.rad(40)), 0.2) end
+	end)
+end)
+
+createButton("Cúi Người Chổng Mông", function()
+	playAction(function(t, root, torso, lLeg, rLeg, lArm, rArm)
+		local b, hr, ss = math.sin(t * 3.0), math.cos(t * 4.2) * 0.08, math.sin(t * 2.0) * 0.05
+		local rootCF = root.CFrame
+		torso.CFrame = torso.CFrame:Lerp(rootCF * CFrame.new(ss, -0.65 + hr, -0.85) * CFrame.Angles(math.rad(78 + b * 2), math.rad(ss * 10), math.rad(ss * 15)), 0.2)
+		lLeg.CFrame = lLeg.CFrame:Lerp(rootCF * CFrame.new(-0.6, -1.55, 0.25) * CFrame.Angles(math.rad(-65 + b * 1.5), math.rad(15), math.rad(-10)), 0.2)
+		rLeg.CFrame = rLeg.CFrame:Lerp(rootCF * CFrame.new(0.6, -1.55, 0.25) * CFrame.Angles(math.rad(-65 + b * 1.5), math.rad(-15), math.rad(10)), 0.2)
+		if lArm then lArm.CFrame = lArm.CFrame:Lerp(rootCF * CFrame.new(-0.85, -1.1, 0.7) * CFrame.Angles(math.rad(-75), math.rad(-20), math.rad(-30)), 0.2) end
+		if rArm then rArm.CFrame = rArm.CFrame:Lerp(rootCF * CFrame.new(0.85, -1.1, 0.7) * CFrame.Angles(math.rad(-75), math.rad(20), math.rad(30)), 0.2) end
+	end)
+end)
+
+createButton("Nằm Ngửa Giang Chân", function()
+	playAction(function(t, root, torso, lLeg, rLeg, lArm, rArm)
+		local breath = math.sin(t * 3.0) * 0.05
+		local rootCF = root.CFrame
+		torso.CFrame = torso.CFrame:Lerp(rootCF * CFrame.new(0, -2.4 + breath, 0) * CFrame.Angles(math.rad(-90), math.rad(0), math.rad(0)), 0.2)
+		lLeg.CFrame = lLeg.CFrame:Lerp(rootCF * CFrame.new(-0.95, -1.5, -0.6) * CFrame.Angles(math.rad(-40), math.rad(55), math.rad(-30)), 0.2)
+		rLeg.CFrame = rLeg.CFrame:Lerp(rootCF * CFrame.new(0.95, -1.5, -0.6) * CFrame.Angles(math.rad(-40), math.rad(-55), math.rad(30)), 0.2)
+		if lArm then lArm.CFrame = lArm.CFrame:Lerp(rootCF * CFrame.new(-1.2, -1.9, -0.2) * CFrame.Angles(math.rad(-80), math.rad(-20), math.rad(-45)), 0.2) end
+		if rArm then rArm.CFrame = rArm.CFrame:Lerp(rootCF * CFrame.new(1.2, -1.9, -0.2) * CFrame.Angles(math.rad(-80), math.rad(20), math.rad(45)), 0.2) end
+	end)
+end)
+
+createButton("Dừng / Đứng Lên", function()
+	stopCurrentAction()
+end)
