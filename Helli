@@ -1,14 +1,14 @@
--- Rule34 Executor Script (Full - Fixed)
+-- Rule34 Executor Script (Improved v2)
 -- Client-Only | R6 + R15 | English code + Vietnamese menu
--- Features: Strip, Breasts, Butt, Physics, Many poses, Sex toys (Floor + Wall)
+-- Fixed: Better body models, real-ish physics, stable poses, no-fling toys
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
 
 local player = Players.LocalPlayer
-
-local character, humanoid, root
+local character, humanoid, root, animator
 local isR15 = false
 
 local state = {
@@ -16,7 +16,7 @@ local state = {
 	breast = false,
 	butt = false,
 	physics = false,
-	physicsPower = 0.045,
+	physicsPower = 0.6,
 	pose = "None",
 	toyMode = "None",
 	toyActive = false
@@ -24,8 +24,9 @@ local state = {
 
 local breastParts, buttParts = {}, {}
 local poseConn, physConn, rideConn = nil, nil, nil
-local toyPart = nil
+local toyPart, alignPos, alignOri = nil, nil, nil
 local gui, mainFrame
+local originalMotors = {}
 
 --// ========== UTILITIES ==========
 local function getChar()
@@ -33,6 +34,7 @@ local function getChar()
 	if not character then return false end
 	humanoid = character:FindFirstChildOfClass("Humanoid")
 	root = character:FindFirstChild("HumanoidRootPart")
+	animator = humanoid and humanoid:FindFirstChildOfClass("Animator")
 	if not (humanoid and root) then return false end
 	isR15 = humanoid.RigType == Enum.HumanoidRigType.R15
 	return true
@@ -51,12 +53,21 @@ local function clearTable(t)
 	table.clear(t)
 end
 
+local function zeroVelocity(part)
+	if part and part:IsA("BasePart") then
+		part.AssemblyLinearVelocity = Vector3.zero
+		part.AssemblyAngularVelocity = Vector3.zero
+	end
+end
+
 --// ========== STRIP ==========
 local function stripClothes()
 	if not getChar() then return end
 	for _, v in ipairs(character:GetDescendants()) do
-		if v:IsA("Shirt") or v:IsA("Pants") or v:IsA("ShirtGraphic") or v:IsA("Clothing") then
-			v:Destroy()
+		if v:IsA("Shirt") or v:IsA("Pants") or v:IsA("ShirtGraphic") or v:IsA("Clothing") or v:IsA("Accessory") then
+			if not (v:IsA("Accessory") and v.Name:lower():find("hair")) then
+				v:Destroy()
+			end
 		end
 	end
 	pcall(function()
@@ -70,20 +81,21 @@ local function stripClothes()
 	notify("Stripped")
 end
 
---// ========== BODY PARTS ==========
-local function createPart(name, size, c0, parent, color)
+--// ========== BETTER BODY PARTS ==========
+local function createBodyPart(name, size, c0, parent, color, meshScale)
 	local p = Instance.new("Part")
 	p.Name = name
 	p.Size = size
-	p.Color = color or Color3.fromRGB(255, 210, 190)
+	p.Color = color or Color3.fromRGB(255, 205, 180)
 	p.Material = Enum.Material.SmoothPlastic
 	p.CanCollide = false
 	p.Massless = true
 	p.CastShadow = true
+	p.Transparency = 0
 
 	local mesh = Instance.new("SpecialMesh")
 	mesh.MeshType = Enum.MeshType.Sphere
-	mesh.Scale = Vector3.new(1, 1, 1)
+	mesh.Scale = meshScale or Vector3.new(1, 1, 1)
 	mesh.Parent = p
 
 	local w = Instance.new("Weld")
@@ -105,11 +117,18 @@ local function toggleBreast()
 	else
 		local parent = isR15 and character:FindFirstChild("UpperTorso") or character:FindFirstChild("Torso")
 		if not parent then return end
-		local l, w1 = createPart("LBreast", Vector3.new(1.2, 1.1, 1.0), CFrame.new(-0.6, 0.45, -0.65), parent)
-		local r, w2 = createPart("RBreast", Vector3.new(1.2, 1.1, 1.0), CFrame.new(0.6, 0.45, -0.65), parent)
-		breastParts = {l, r, w1, w2}
+
+		-- Main breasts (larger + better shape)
+		local l, w1 = createBodyPart("LBreast", Vector3.new(1.35, 1.25, 1.15), CFrame.new(-0.55, 0.42, -0.72), parent, nil, Vector3.new(1.05, 0.95, 1.0))
+		local r, w2 = createBodyPart("RBreast", Vector3.new(1.35, 1.25, 1.15), CFrame.new(0.55, 0.42, -0.72), parent, nil, Vector3.new(1.05, 0.95, 1.0))
+
+		-- Soft under + side volume for better shape
+		local l2, w3 = createBodyPart("LBreastSoft", Vector3.new(1.1, 0.7, 0.9), CFrame.new(-0.48, 0.05, -0.55), parent, Color3.fromRGB(255, 195, 170), Vector3.new(1, 0.7, 0.9))
+		local r2, w4 = createBodyPart("RBreastSoft", Vector3.new(1.1, 0.7, 0.9), CFrame.new(0.48, 0.05, -0.55), parent, Color3.fromRGB(255, 195, 170), Vector3.new(1, 0.7, 0.9))
+
+		breastParts = {l, r, l2, r2, w1, w2, w3, w4}
 		state.breast = true
-		notify("Breasts ON")
+		notify("Breasts ON (Improved)")
 	end
 end
 
@@ -122,15 +141,22 @@ local function toggleButt()
 	else
 		local parent = isR15 and character:FindFirstChild("LowerTorso") or character:FindFirstChild("Torso")
 		if not parent then return end
-		local l, w1 = createPart("LButt", Vector3.new(1.3, 1.2, 1.1), CFrame.new(-0.5, -0.5, 0.75), parent, Color3.fromRGB(255, 195, 180))
-		local r, w2 = createPart("RButt", Vector3.new(1.3, 1.2, 1.1), CFrame.new(0.5, -0.5, 0.75), parent, Color3.fromRGB(255, 195, 180))
-		buttParts = {l, r, w1, w2}
+
+		local l, w1 = createBodyPart("LButt", Vector3.new(1.45, 1.35, 1.25), CFrame.new(-0.48, -0.55, 0.78), parent, Color3.fromRGB(255, 190, 170), Vector3.new(1.05, 1.0, 1.0))
+		local r, w2 = createBodyPart("RButt", Vector3.new(1.45, 1.35, 1.25), CFrame.new(0.48, -0.55, 0.78), parent, Color3.fromRGB(255, 190, 170), Vector3.new(1.05, 1.0, 1.0))
+
+		-- Soft lower volume
+		local l2, w3 = createBodyPart("LButtSoft", Vector3.new(1.2, 0.8, 1.0), CFrame.new(-0.42, -0.95, 0.55), parent, Color3.fromRGB(255, 180, 160), Vector3.new(1, 0.75, 0.95))
+		local r2, w4 = createBodyPart("RButtSoft", Vector3.new(1.2, 0.8, 1.0), CFrame.new(0.42, -0.95, 0.55), parent, Color3.fromRGB(255, 180, 160), Vector3.new(1, 0.75, 0.95))
+
+		buttParts = {l, r, l2, r2, w1, w2, w3, w4}
 		state.butt = true
-		notify("Butt ON")
+		notify("Butt ON (Improved)")
 	end
 end
 
---// ========== PHYSICS ==========
+--// ========== BETTER PHYSICS (Velocity + Spring style) ==========
+local breastVel, buttVel = {}, {}
 local function setPhysics(on)
 	if physConn then physConn:Disconnect() physConn = nil end
 	state.physics = on
@@ -139,41 +165,83 @@ local function setPhysics(on)
 		return
 	end
 	notify("Physics ON | Power: " .. string.format("%.2f", state.physicsPower))
-	physConn = RunService.RenderStepped:Connect(function()
-		local t = tick()
-		local pwr = state.physicsPower
-		local function jiggle(list)
-			for i = 1, #list, 2 do
-				local part = list[i]
-				local weld = list[i+1]
+
+	-- Reset velocities
+	for i = 1, 8 do breastVel[i] = Vector3.zero end
+	for i = 1, 8 do buttVel[i] = Vector3.zero end
+
+	local lastRootPos = root and root.Position or Vector3.zero
+
+	physConn = RunService.RenderStepped:Connect(function(dt)
+		if not getChar() then return end
+		dt = math.clamp(dt, 0, 0.05)
+		local power = state.physicsPower
+
+		local currentPos = root.Position
+		local accel = (currentPos - lastRootPos) / math.max(dt, 0.001)
+		lastRootPos = currentPos
+
+		local function applyJiggle(parts, vels, baseMul)
+			for i = 1, #parts, 2 do
+				local part = parts[i]
+				local weld = parts[i+1]
 				if part and part.Parent and weld and weld:IsA("Weld") then
-					weld.C0 = weld.C0:Lerp(weld.C0 * CFrame.new(
-						math.sin(t * 8.5 + i) * pwr,
-						math.cos(t * 6.8 + i) * pwr * 0.7,
-						math.sin(t * 5.2 + i) * pwr * 0.35
-					), 0.3)
+					local idx = math.ceil(i/2)
+					local targetOffset = Vector3.new(
+						math.sin(tick() * 4.2 + idx) * 0.015,
+						math.cos(tick() * 3.6 + idx) * 0.012,
+						0
+					)
+
+					-- Influence from movement
+					local influence = accel * Vector3.new(0.004, 0.003, 0.002) * power * baseMul
+					vels[idx] = (vels[idx] or Vector3.zero) * 0.88 + influence + targetOffset
+
+					-- Soft spring back
+					vels[idx] = vels[idx]:Lerp(Vector3.zero, 0.08)
+
+					local offset = vels[idx]
+					weld.C0 = weld.C0:Lerp(
+						CFrame.new(offset.X, offset.Y, offset.Z) * CFrame.Angles(
+							math.rad(offset.Y * 18),
+							math.rad(offset.X * 12),
+							0
+						),
+						0.35
+					)
 				end
 			end
 		end
-		if state.breast then jiggle(breastParts) end
-		if state.butt then jiggle(buttParts) end
+
+		if state.breast then applyJiggle(breastParts, breastVel, 1.15) end
+		if state.butt then applyJiggle(buttParts, buttVel, 1.0) end
 	end)
 end
 
 local function changePhysics(delta)
-	state.physicsPower = math.clamp(state.physicsPower + delta, 0.01, 0.12)
+	state.physicsPower = math.clamp(state.physicsPower + delta, 0.15, 1.4)
 	if state.physics then setPhysics(true) end
 	notify("Physics power: " .. string.format("%.2f", state.physicsPower))
 end
 
---// ========== POSES ==========
+--// ========== STABLE POSES (Motor6D based + root lock) ==========
 local function stopPose()
 	if poseConn then poseConn:Disconnect() poseConn = nil end
 	state.pose = "None"
+
 	pcall(function()
 		if humanoid then
 			humanoid.PlatformStand = false
+			humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
 		end
+		-- Restore motors if we modified them
+		for motor, data in pairs(originalMotors) do
+			if motor and motor.Parent then
+				motor.C0 = data.C0
+				motor.C1 = data.C1
+			end
+		end
+		table.clear(originalMotors)
 	end)
 	notify("Đã reset tư thế")
 end
@@ -181,122 +249,111 @@ end
 local function applyPose(name)
 	if not getChar() then return end
 	stopPose()
+
+	-- Stop all animations
 	pcall(function()
 		for _, track in ipairs(humanoid:GetPlayingAnimationTracks()) do
 			track:Stop(0)
 		end
-		local animator = humanoid:FindFirstChildOfClass("Animator")
 		if animator then
 			for _, track in ipairs(animator:GetPlayingAnimationTracks()) do
 				track:Stop(0)
 			end
 		end
 	end)
+
 	state.pose = name
 	notify("Pose: " .. name)
 
-	poseConn = RunService.RenderStepped:Connect(function()
-		if not character or not character.Parent or not root then stopPose() return end
-		
-		pcall(function()
-			humanoid.PlatformStand = true
-		end)
+	humanoid.PlatformStand = true
+	zeroVelocity(root)
 
-		local function set(part, cf) 
-			if part then 
-				part.CFrame = cf 
-				if part:IsA("BasePart") then
-					part.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
-					part.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+	poseConn = RunService.RenderStepped:Connect(function()
+		if not character or not character.Parent or not root then
+			stopPose()
+			return
+		end
+
+		zeroVelocity(root)
+		for _, part in ipairs(character:GetChildren()) do
+			if part:IsA("BasePart") then
+				zeroVelocity(part)
+			end
+		end
+
+		-- Keep root stable
+		local base = root.CFrame
+
+		local function setMotor(jointName, c0)
+			local motor = character:FindFirstChild(jointName, true)
+			if motor and motor:IsA("Motor6D") then
+				if not originalMotors[motor] then
+					originalMotors[motor] = {C0 = motor.C0, C1 = motor.C1}
 				end
-			end 
+				motor.C0 = c0
+			end
 		end
 
 		if isR15 then
-			local upper = character:FindFirstChild("UpperTorso")
-			local lower = character:FindFirstChild("LowerTorso")
-			local lul = character:FindFirstChild("LeftUpperLeg")
-			local rul = character:FindFirstChild("RightUpperLeg")
-			local lua = character:FindFirstChild("LeftUpperArm")
-			local rua = character:FindFirstChild("RightUpperArm")
-
 			if name == "Doggy" then
-				set(upper, root.CFrame * CFrame.new(0, 0.4, 0) * CFrame.Angles(math.rad(50), 0, 0))
-				set(lower, root.CFrame * CFrame.new(0, -0.35, 0.25) * CFrame.Angles(math.rad(20), 0, 0))
-				set(lul, root.CFrame * CFrame.new(-0.5, -0.85, 0.35) * CFrame.Angles(math.rad(-40), math.rad(18), 0))
-				set(rul, root.CFrame * CFrame.new(0.5, -0.85, 0.35) * CFrame.Angles(math.rad(-40), math.rad(-18), 0))
+				setMotor("Waist", CFrame.new(0, 0.2, 0) * CFrame.Angles(math.rad(25), 0, 0))
+				setMotor("Root", CFrame.new(0, 0, 0) * CFrame.Angles(math.rad(-15), 0, 0))
+				setMotor("LeftHip", CFrame.new(-0.4, -0.6, 0.2) * CFrame.Angles(math.rad(-35), math.rad(15), 0))
+				setMotor("RightHip", CFrame.new(0.4, -0.6, 0.2) * CFrame.Angles(math.rad(-35), math.rad(-15), 0))
 			elseif name == "Missionary" then
-				set(lul, root.CFrame * CFrame.new(-0.4, -0.15, 0.7) * CFrame.Angles(math.rad(-100), math.rad(28), 0))
-				set(rul, root.CFrame * CFrame.new(0.4, -0.15, 0.7) * CFrame.Angles(math.rad(-100), math.rad(-28), 0))
+				setMotor("LeftHip", CFrame.new(-0.35, -0.1, 0.55) * CFrame.Angles(math.rad(-95), math.rad(20), 0))
+				setMotor("RightHip", CFrame.new(0.35, -0.1, 0.55) * CFrame.Angles(math.rad(-95), math.rad(-20), 0))
 			elseif name == "Cowgirl" then
-				set(lul, root.CFrame * CFrame.new(-0.55, -0.45, 0.1) * CFrame.Angles(math.rad(-60), math.rad(42), math.rad(8)))
-				set(rul, root.CFrame * CFrame.new(0.55, -0.45, 0.1) * CFrame.Angles(math.rad(-60), math.rad(-42), math.rad(-8)))
+				setMotor("LeftHip", CFrame.new(-0.5, -0.4, 0.05) * CFrame.Angles(math.rad(-55), math.rad(35), math.rad(5)))
+				setMotor("RightHip", CFrame.new(0.5, -0.4, 0.05) * CFrame.Angles(math.rad(-55), math.rad(-35), math.rad(-5)))
 			elseif name == "Reverse Cowgirl" then
-				set(lul, root.CFrame * CFrame.new(-0.55, -0.45, -0.15) * CFrame.Angles(math.rad(-55), math.rad(40), 0))
-				set(rul, root.CFrame * CFrame.new(0.55, -0.45, -0.15) * CFrame.Angles(math.rad(-55), math.rad(-40), 0))
+				setMotor("LeftHip", CFrame.new(-0.5, -0.4, -0.1) * CFrame.Angles(math.rad(-50), math.rad(32), 0))
+				setMotor("RightHip", CFrame.new(0.5, -0.4, -0.1) * CFrame.Angles(math.rad(-50), math.rad(-32), 0))
 			elseif name == "Legs Up" then
-				set(lul, root.CFrame * CFrame.new(-0.35, 0.35, 0.75) * CFrame.Angles(math.rad(-135), math.rad(12), 0))
-				set(rul, root.CFrame * CFrame.new(0.35, 0.35, 0.75) * CFrame.Angles(math.rad(-135), math.rad(-12), 0))
+				setMotor("LeftHip", CFrame.new(-0.3, 0.3, 0.65) * CFrame.Angles(math.rad(-125), math.rad(10), 0))
+				setMotor("RightHip", CFrame.new(0.3, 0.3, 0.65) * CFrame.Angles(math.rad(-125), math.rad(-10), 0))
 			elseif name == "Bent Over" then
-				set(upper, root.CFrame * CFrame.new(0, 0.15, 0.4) * CFrame.Angles(math.rad(70), 0, 0))
-				set(lower, root.CFrame * CFrame.new(0, -0.55, 0.55) * CFrame.Angles(math.rad(35), 0, 0))
-			elseif name == "On Back" then
-				set(upper, root.CFrame * CFrame.new(0, -0.2, 0) * CFrame.Angles(math.rad(-15), 0, 0))
-				set(lul, root.CFrame * CFrame.new(-0.45, -0.3, 0.6) * CFrame.Angles(math.rad(-90), math.rad(25), 0))
-				set(rul, root.CFrame * CFrame.new(0.45, -0.3, 0.6) * CFrame.Angles(math.rad(-90), math.rad(-25), 0))
-			elseif name == "Squat" then
-				set(lul, root.CFrame * CFrame.new(-0.4, -0.7, 0.2) * CFrame.Angles(math.rad(-80), math.rad(12), 0))
-				set(rul, root.CFrame * CFrame.new(0.4, -0.7, 0.2) * CFrame.Angles(math.rad(-80), math.rad(-12), 0))
+				setMotor("Waist", CFrame.new(0, 0.1, 0.25) * CFrame.Angles(math.rad(55), 0, 0))
+				setMotor("Root", CFrame.new(0, 0, 0) * CFrame.Angles(math.rad(-20), 0, 0))
 			elseif name == "All Fours" then
-				set(upper, root.CFrame * CFrame.new(0, 0.1, 0.35) * CFrame.Angles(math.rad(75), 0, 0))
-				set(lower, root.CFrame * CFrame.new(0, -0.6, 0.55) * CFrame.Angles(math.rad(40), 0, 0))
-				set(lua, root.CFrame * CFrame.new(-0.85, 0.05, 0.65) * CFrame.Angles(math.rad(-85), 0, math.rad(25)))
-				set(rua, root.CFrame * CFrame.new(0.85, 0.05, 0.65) * CFrame.Angles(math.rad(-85), 0, math.rad(-25)))
+				setMotor("Waist", CFrame.new(0, 0.05, 0.3) * CFrame.Angles(math.rad(60), 0, 0))
+				setMotor("LeftShoulder", CFrame.new(-0.7, 0.1, 0.5) * CFrame.Angles(math.rad(-70), 0, math.rad(20)))
+				setMotor("RightShoulder", CFrame.new(0.7, 0.1, 0.5) * CFrame.Angles(math.rad(-70), 0, math.rad(-20)))
 			elseif name == "Standing Spread" then
-				set(lul, root.CFrame * CFrame.new(-0.7, -0.9, 0) * CFrame.Angles(math.rad(-10), math.rad(35), 0))
-				set(rul, root.CFrame * CFrame.new(0.7, -0.9, 0) * CFrame.Angles(math.rad(-10), math.rad(-35), 0))
+				setMotor("LeftHip", CFrame.new(-0.65, -0.85, 0) * CFrame.Angles(math.rad(-8), math.rad(28), 0))
+				setMotor("RightHip", CFrame.new(0.65, -0.85, 0) * CFrame.Angles(math.rad(-8), math.rad(-28), 0))
+			elseif name == "Squat" then
+				setMotor("LeftHip", CFrame.new(-0.35, -0.65, 0.15) * CFrame.Angles(math.rad(-75), math.rad(10), 0))
+				setMotor("RightHip", CFrame.new(0.35, -0.65, 0.15) * CFrame.Angles(math.rad(-75), math.rad(-10), 0))
 			end
 		else
+			-- R6 simplified stable poses
 			local torso = character:FindFirstChild("Torso")
-			local ll = character:FindFirstChild("Left Leg")
-			local rl = character:FindFirstChild("Right Leg")
-			local la = character:FindFirstChild("Left Arm")
-			local ra = character:FindFirstChild("Right Arm")
+			if not torso then return end
 
 			if name == "Doggy" then
-				set(torso, root.CFrame * CFrame.new(0, 0.15, 0) * CFrame.Angles(math.rad(55), 0, 0))
-				set(ll, root.CFrame * CFrame.new(-0.5, -1.05, 0.3) * CFrame.Angles(math.rad(-45), math.rad(18), 0))
-				set(rl, root.CFrame * CFrame.new(0.5, -1.05, 0.3) * CFrame.Angles(math.rad(-45), math.rad(-18), 0))
+				torso.CFrame = base * CFrame.new(0, 0.1, 0) * CFrame.Angles(math.rad(45), 0, 0)
 			elseif name == "Missionary" then
-				set(ll, root.CFrame * CFrame.new(-0.4, -0.25, 0.75) * CFrame.Angles(math.rad(-105), math.rad(25), 0))
-				set(rl, root.CFrame * CFrame.new(0.4, -0.25, 0.75) * CFrame.Angles(math.rad(-105), math.rad(-25), 0))
-			elseif name == "Cowgirl" then
-				set(ll, root.CFrame * CFrame.new(-0.55, -0.75, 0.1) * CFrame.Angles(math.rad(-65), math.rad(40), 0))
-				set(rl, root.CFrame * CFrame.new(0.55, -0.75, 0.1) * CFrame.Angles(math.rad(-65), math.rad(-40), 0))
-			elseif name == "Legs Up" then
-				set(ll, root.CFrame * CFrame.new(-0.35, 0.25, 0.85) * CFrame.Angles(math.rad(-135), math.rad(12), 0))
-				set(rl, root.CFrame * CFrame.new(0.35, 0.25, 0.85) * CFrame.Angles(math.rad(-135), math.rad(-15), 0))
+				-- Keep simple for R6 stability
 			elseif name == "Bent Over" then
-				set(torso, root.CFrame * CFrame.new(0, 0, 0.35) * CFrame.Angles(math.rad(75), 0, 0))
+				torso.CFrame = base * CFrame.new(0, 0, 0.25) * CFrame.Angles(math.rad(65), 0, 0)
 			elseif name == "All Fours" then
-				set(torso, root.CFrame * CFrame.new(0, 0, 0.3) * CFrame.Angles(math.rad(80), 0, 0))
-				set(la, root.CFrame * CFrame.new(-1, 0.15, 0.7) * CFrame.Angles(math.rad(-90), 0, math.rad(35)))
-				set(ra, root.CFrame * CFrame.new(1, 0.15, 0.7) * CFrame.Angles(math.rad(-90), 0, math.rad(-35)))
-			elseif name == "Standing Spread" then
-				set(ll, root.CFrame * CFrame.new(-0.7, -1, 0) * CFrame.Angles(math.rad(-5), math.rad(30), 0))
-				set(rl, root.CFrame * CFrame.new(0.7, -1, 0) * CFrame.Angles(math.rad(-5), math.rad(-30), 0))
+				torso.CFrame = base * CFrame.new(0, 0, 0.2) * CFrame.Angles(math.rad(70), 0, 0)
 			end
 		end
 	end)
 end
 
---// ========== SEX TOYS (Floor + Wall) ==========
+--// ========== IMPROVED SEX TOYS (No fling) ==========
 local function removeToy()
 	if rideConn then rideConn:Disconnect() rideConn = nil end
+	if alignPos then alignPos:Destroy() alignPos = nil end
+	if alignOri then alignOri:Destroy() alignOri = nil end
 	if toyPart and toyPart.Parent then toyPart:Destroy() end
 	toyPart = nil
 	state.toyMode = "None"
 	state.toyActive = false
+	if humanoid then humanoid.PlatformStand = false end
 	notify("Toy removed")
 end
 
@@ -307,23 +364,23 @@ local function createToyModel(toyType)
 	toy.Massless = true
 	toy.Anchored = true
 	toy.Material = Enum.Material.SmoothPlastic
-	toy.Color = Color3.fromRGB(255, 140, 170)
+	toy.Color = Color3.fromRGB(255, 130, 160)
+	toy.CastShadow = true
+
+	local mesh = Instance.new("SpecialMesh")
+	mesh.Parent = toy
 
 	if toyType == "Dildo" then
-		toy.Size = Vector3.new(0.38, 1.55, 0.38)
-		local m = Instance.new("SpecialMesh")
-		m.MeshType = Enum.MeshType.Cylinder
-		m.Parent = toy
+		toy.Size = Vector3.new(0.42, 1.7, 0.42)
+		mesh.MeshType = Enum.MeshType.Cylinder
+		mesh.Scale = Vector3.new(1, 1, 1)
 	elseif toyType == "Vibrator" then
-		toy.Size = Vector3.new(0.42, 0.95, 0.42)
-		local m = Instance.new("SpecialMesh")
-		m.MeshType = Enum.MeshType.Sphere
-		m.Parent = toy
+		toy.Size = Vector3.new(0.48, 1.05, 0.48)
+		mesh.MeshType = Enum.MeshType.Sphere
+		mesh.Scale = Vector3.new(1, 1.1, 1)
 	else
-		toy.Size = Vector3.new(0.55, 0.65, 0.55)
-		local m = Instance.new("SpecialMesh")
-		m.MeshType = Enum.MeshType.Sphere
-		m.Parent = toy
+		toy.Size = Vector3.new(0.6, 0.7, 0.6)
+		mesh.MeshType = Enum.MeshType.Sphere
 	end
 	return toy
 end
@@ -341,15 +398,15 @@ local function placeToy(toyType, mode)
 	params.FilterDescendantsInstances = {character}
 	params.FilterType = Enum.RaycastFilterType.Exclude
 
-	local result = workspace:Raycast(unitRay.Origin, unitRay.Direction * 60, params)
+	local result = workspace:Raycast(unitRay.Origin, unitRay.Direction * 80, params)
 	if result then
 		if mode == "Floor" then
-			toy.CFrame = CFrame.new(result.Position + Vector3.new(0, toy.Size.Y/2, 0))
+			toy.CFrame = CFrame.new(result.Position + Vector3.new(0, toy.Size.Y/2 + 0.05, 0))
 		else
 			toy.CFrame = CFrame.new(result.Position, result.Position + result.Normal) * CFrame.Angles(math.rad(90), 0, 0)
 		end
 	else
-		toy.CFrame = root.CFrame * CFrame.new(0, -2.8, -2.5)
+		toy.CFrame = root.CFrame * CFrame.new(0, -2.6, -2.8)
 	end
 
 	toyPart = toy
@@ -361,65 +418,50 @@ local function startRide()
 	if not toyPart or not getChar() or state.toyActive then return end
 	state.toyActive = true
 	stopPose()
+	humanoid.PlatformStand = true
+
+	-- Create AlignPosition to prevent flinging
+	alignPos = Instance.new("AlignPosition")
+	alignPos.Mode = Enum.PositionAlignmentMode.OneAttachment
+	alignPos.MaxForce = 50000
+	alignPos.MaxVelocity = 12
+	alignPos.Responsiveness = 35
+	alignPos.Attachment0 = Instance.new("Attachment", root)
+	alignPos.Parent = root
+
+	alignOri = Instance.new("AlignOrientation")
+	alignOri.Mode = Enum.OrientationAlignmentMode.OneAttachment
+	alignOri.MaxTorque = 50000
+	alignOri.Responsiveness = 25
+	alignOri.Attachment0 = alignPos.Attachment0
+	alignOri.Parent = root
 
 	local baseCF = toyPart.CFrame
 	local t = 0
 
 	rideConn = RunService.RenderStepped:Connect(function(dt)
-		if not character or not character.Parent or not toyPart then
+		if not character or not character.Parent or not toyPart or not root then
 			removeToy()
 			return
 		end
 		t = t + dt
+		zeroVelocity(root)
 
 		if state.toyMode == "Floor" then
-			local height = math.sin(t * 6.2) * 0.32 + 0.12
-			local squatCF = baseCF * CFrame.new(0, 1.05 + height, 0) * CFrame.Angles(math.rad(-12), 0, 0)
-
-			if isR15 then
-				local upper = character:FindFirstChild("UpperTorso")
-				local lower = character:FindFirstChild("LowerTorso")
-				local lul = character:FindFirstChild("LeftUpperLeg")
-				local rul = character:FindFirstChild("RightUpperLeg")
-				if lower then lower.CFrame = squatCF end
-				if upper then upper.CFrame = squatCF * CFrame.new(0, 0.65, 0) * CFrame.Angles(math.rad(8), 0, 0) end
-				if lul then lul.CFrame = squatCF * CFrame.new(-0.4, -0.55, 0.1) * CFrame.Angles(math.rad(-78), math.rad(10), 0) end
-				if rul then rul.CFrame = squatCF * CFrame.new(0.4, -0.55, 0.1) * CFrame.Angles(math.rad(-78), math.rad(-10), 0) end
-			else
-				local torso = character:FindFirstChild("Torso")
-				local ll = character:FindFirstChild("Left Leg")
-				local rl = character:FindFirstChild("Right Leg")
-				if torso then torso.CFrame = squatCF end
-				if ll then ll.CFrame = squatCF * CFrame.new(-0.5, -1, 0) * CFrame.Angles(math.rad(-82), 8, 0) end
-				if rl then rl.CFrame = squatCF * CFrame.new(0.5, -1, 0) * CFrame.Angles(math.rad(-82), -8, 0) end
-			end
-
+			local height = math.sin(t * 5.8) * 0.28 + 0.15
+			local target = baseCF * CFrame.new(0, 1.15 + height, 0) * CFrame.Angles(math.rad(-8), 0, 0)
+			alignPos.Position = target.Position
+			alignOri.CFrame = target
 		elseif state.toyMode == "Wall" then
-			local press = math.sin(t * 5.8) * 0.16
-			if isR15 then
-				local upper = character:FindFirstChild("UpperTorso")
-				local lower = character:FindFirstChild("LowerTorso")
-				local lul = character:FindFirstChild("LeftUpperLeg")
-				local rul = character:FindFirstChild("RightUpperLeg")
-				local wallCF = baseCF * CFrame.new(0, 0.15, -0.75 + press) * CFrame.Angles(math.rad(58), 0, 0)
-				if upper then upper.CFrame = wallCF end
-				if lower then lower.CFrame = wallCF * CFrame.new(0, -0.7, 0.12) * CFrame.Angles(math.rad(18), 0, 0) end
-				if lul then lul.CFrame = wallCF * CFrame.new(-0.45, -0.9, 0.2) * CFrame.Angles(math.rad(-28), math.rad(12), 0) end
-				if rul then rul.CFrame = wallCF * CFrame.new(0.45, -0.9, 0.2) * CFrame.Angles(math.rad(-28), math.rad(-12), 0) end
-			else
-				local torso = character:FindFirstChild("Torso")
-				local ll = character:FindFirstChild("Left Leg")
-				local rl = character:FindFirstChild("Right Leg")
-				local wallCF = baseCF * CFrame.new(0, 0.1, -0.7 + press) * CFrame.Angles(math.rad(62), 0, 0)
-				if torso then torso.CFrame = wallCF end
-				if ll then ll.CFrame = wallCF * CFrame.new(-0.5, -1.1, 0.2) * CFrame.Angles(math.rad(-32), 12, 0) end
-				if rl then rl.CFrame = wallCF * CFrame.new(0.5, -1.1, 0.2) * CFrame.Angles(math.rad(-32), -12, 0) end
-			end
+			local press = math.sin(t * 5.5) * 0.14
+			local target = baseCF * CFrame.new(0, 0.2, -0.85 + press) * CFrame.Angles(math.rad(55), 0, 0)
+			alignPos.Position = target.Position
+			alignOri.CFrame = target
 		end
 	end)
 end
 
---// ========== MENU (Tiếng Việt tối giản) ==========
+--// ========== MENU ==========
 local function createMenu()
 	if gui then gui:Destroy() end
 	gui = Instance.new("ScreenGui")
@@ -428,30 +470,30 @@ local function createMenu()
 	gui.Parent = player:WaitForChild("PlayerGui")
 
 	mainFrame = Instance.new("Frame")
-	mainFrame.Size = UDim2.new(0, 190, 0, 440)
-	mainFrame.Position = UDim2.new(0, 12, 0.5, -220)
-	mainFrame.BackgroundColor3 = Color3.fromRGB(16, 16, 20)
+	mainFrame.Size = UDim2.new(0, 200, 0, 460)
+	mainFrame.Position = UDim2.new(0, 12, 0.5, -230)
+	mainFrame.BackgroundColor3 = Color3.fromRGB(14, 14, 18)
 	mainFrame.BorderSizePixel = 0
 	mainFrame.Visible = false
 	mainFrame.Parent = gui
 	Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 8)
 
 	local title = Instance.new("TextLabel")
-	title.Size = UDim2.new(1, 0, 0, 26)
-	title.BackgroundColor3 = Color3.fromRGB(28, 28, 36)
-	title.Text = "Menu 18+"
-	title.TextColor3 = Color3.fromRGB(255, 115, 165)
+	title.Size = UDim2.new(1, 0, 0, 28)
+	title.BackgroundColor3 = Color3.fromRGB(26, 26, 34)
+	title.Text = "Menu 18+ (Improved)"
+	title.TextColor3 = Color3.fromRGB(255, 110, 160)
 	title.Font = Enum.Font.GothamBold
 	title.TextSize = 13
 	title.Parent = mainFrame
 	Instance.new("UICorner", title).CornerRadius = UDim.new(0, 8)
 
 	local scroll = Instance.new("ScrollingFrame")
-	scroll.Size = UDim2.new(1, -8, 1, -32)
-	scroll.Position = UDim2.new(0, 4, 0, 28)
+	scroll.Size = UDim2.new(1, -8, 1, -34)
+	scroll.Position = UDim2.new(0, 4, 0, 30)
 	scroll.BackgroundTransparency = 1
 	scroll.ScrollBarThickness = 3
-	scroll.CanvasSize = UDim2.new(0, 0, 0, 820)
+	scroll.CanvasSize = UDim2.new(0, 0, 0, 880)
 	scroll.Parent = mainFrame
 
 	local list = Instance.new("UIListLayout")
@@ -460,10 +502,10 @@ local function createMenu()
 
 	local function btn(text, func)
 		local b = Instance.new("TextButton")
-		b.Size = UDim2.new(1, 0, 0, 26)
-		b.BackgroundColor3 = Color3.fromRGB(38, 38, 48)
+		b.Size = UDim2.new(1, 0, 0, 27)
+		b.BackgroundColor3 = Color3.fromRGB(36, 36, 46)
 		b.Text = text
-		b.TextColor3 = Color3.fromRGB(225, 225, 225)
+		b.TextColor3 = Color3.fromRGB(230, 230, 230)
 		b.Font = Enum.Font.Gotham
 		b.TextSize = 12
 		b.Parent = scroll
@@ -475,8 +517,8 @@ local function createMenu()
 	btn("Bật/Tắt Ngực", toggleBreast)
 	btn("Bật/Tắt Mông", toggleButt)
 	btn("Bật/Tắt Vật lý", function() setPhysics(not state.physics) end)
-	btn("Vật lý +", function() changePhysics(0.01) end)
-	btn("Vật lý -", function() changePhysics(-0.01) end)
+	btn("Vật lý +", function() changePhysics(0.1) end)
+	btn("Vật lý -", function() changePhysics(-0.1) end)
 
 	btn("--- Tư thế ---", function() end)
 	btn("Doggy", function() applyPose("Doggy") end)
@@ -485,7 +527,6 @@ local function createMenu()
 	btn("Reverse Cowgirl", function() applyPose("Reverse Cowgirl") end)
 	btn("Legs Up", function() applyPose("Legs Up") end)
 	btn("Bent Over", function() applyPose("Bent Over") end)
-	btn("On Back", function() applyPose("On Back") end)
 	btn("Squat", function() applyPose("Squat") end)
 	btn("All Fours", function() applyPose("All Fours") end)
 	btn("Standing Spread", function() applyPose("Standing Spread") end)
@@ -498,6 +539,16 @@ local function createMenu()
 	btn("Đặt Vibrator (Tường)", function() placeToy("Vibrator", "Wall") end)
 	btn("Bắt đầu nhấp / áp", startRide)
 	btn("Dừng + Xóa toy", removeToy)
+
+	btn("--- Khác ---", function() end)
+	btn("Reset toàn bộ", function()
+		stopPose()
+		removeToy()
+		if state.breast then toggleBreast() end
+		if state.butt then toggleButt() end
+		if state.physics then setPhysics(false) end
+		notify("Full reset")
+	end)
 end
 
 --// ========== INIT ==========
@@ -509,7 +560,7 @@ UserInputService.InputBegan:Connect(function(input, gp)
 end)
 
 player.CharacterAdded:Connect(function()
-	task.wait(1.3)
+	task.wait(1.4)
 	getChar()
 	state.stripped = false
 	state.breast = false
@@ -524,7 +575,7 @@ player.CharacterAdded:Connect(function()
 	notify("Character ready")
 end)
 
-task.wait(0.6)
+task.wait(0.7)
 getChar()
 createMenu()
-notify("Script loaded | Press P to open menu")
+notify("Improved Script loaded | Press P to open menu")
