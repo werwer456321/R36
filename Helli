@@ -1,27 +1,31 @@
--- Rule34 R6 Only - Clean Version
--- Features: Better breasts/butt, 4 poses, Penis toy, Ride + Moan sound
+-- Rule34 Executor Script (R6 + R15) - Full Update
+-- Key: R | Skin-color body | Vagina + Anus + Navel | Penis toy | Slow squat ride + moan
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
-local SoundService = game:GetService("SoundService")
+local TweenService = game:GetService("TweenService")
 
 local player = Players.LocalPlayer
 local character, humanoid, root, torso
+local isR15 = false
+
 local state = {
 	stripped = false,
 	breast = false,
 	butt = false,
+	genitals = false,
 	physics = false,
+	physicsPower = 0.04,
 	pose = "None",
 	toyActive = false
 }
 
-local breastParts, buttParts = {}, {}
+local breastParts, buttParts, genitalParts = {}, {}, {}
 local poseConn, physConn, rideConn = nil, nil, nil
-local toyPart = nil
-local moanSound = nil
+local toyModel = nil
 local gui, mainFrame
+local originalMotors = {}
 
 --// ========== UTIL ==========
 local function getChar()
@@ -29,12 +33,9 @@ local function getChar()
 	if not character then return false end
 	humanoid = character:FindFirstChildOfClass("Humanoid")
 	root = character:FindFirstChild("HumanoidRootPart")
-	torso = character:FindFirstChild("Torso")
+	torso = character:FindFirstChild("Torso") or character:FindFirstChild("UpperTorso")
 	if not (humanoid and root and torso) then return false end
-	if humanoid.RigType \~= Enum.HumanoidRigType.R6 then
-		warn("[R34] Script này chỉ hỗ trợ R6!")
-		return false
-	end
+	isR15 = humanoid.RigType == Enum.HumanoidRigType.R15
 	return true
 end
 
@@ -51,10 +52,19 @@ local function clearTable(t)
 	table.clear(t)
 end
 
-local function zeroVel(part)
-	if part and part:IsA("BasePart") then
-		part.AssemblyLinearVelocity = Vector3.zero
-		part.AssemblyAngularVelocity = Vector3.zero
+local function getSkinColor()
+	-- Ưu tiên BodyColors, fallback Torso
+	local bc = character:FindFirstChildOfClass("BodyColors")
+	if bc then
+		return bc.TorsoColor3
+	end
+	return torso.Color
+end
+
+local function zeroVel()
+	if root then
+		root.AssemblyLinearVelocity = Vector3.zero
+		root.AssemblyAngularVelocity = Vector3.zero
 	end
 end
 
@@ -62,34 +72,28 @@ end
 local function stripClothes()
 	if not getChar() then return end
 	for _, v in ipairs(character:GetDescendants()) do
-		if v:IsA("Shirt") or v:IsA("Pants") or v:IsA("ShirtGraphic") or v:IsA("Clothing") then
+		if v:IsA("Clothing") or v:IsA("ShirtGraphic") or v.Name:lower():find("shirt") or v.Name:lower():find("pants") or v.Name:lower():find("tshirt") then
 			v:Destroy()
 		end
 	end
-	pcall(function()
-		local desc = humanoid:GetAppliedDescription()
-		desc.Shirt = 0
-		desc.Pants = 0
-		desc.GraphicTShirt = 0
-		humanoid:ApplyDescriptionReset(desc)
-	end)
 	state.stripped = true
 	notify("Stripped")
 end
 
---// ========== BODY PARTS (gần style video) ==========
-local function createPart(name, size, c0, parent, color, meshScale)
+--// ========== CREATE PART ==========
+local function createPart(name, size, c0, parent, color, meshScale, meshType)
 	local p = Instance.new("Part")
 	p.Name = name
 	p.Size = size
-	p.Color = color or Color3.fromRGB(255, 210, 195)
+	p.Color = color
 	p.Material = Enum.Material.SmoothPlastic
 	p.CanCollide = false
 	p.Massless = true
 	p.CastShadow = true
+	p.Transparency = 0
 
 	local mesh = Instance.new("SpecialMesh")
-	mesh.MeshType = Enum.MeshType.Sphere
+	mesh.MeshType = meshType or Enum.MeshType.Sphere
 	mesh.Scale = meshScale or Vector3.new(1, 1, 1)
 	mesh.Parent = p
 
@@ -103,335 +107,402 @@ local function createPart(name, size, c0, parent, color, meshScale)
 	return p, w
 end
 
+--// ========== BREAST ==========
 local function toggleBreast()
 	if not getChar() then return end
 	if state.breast then
 		clearTable(breastParts)
 		state.breast = false
-		notify("Breasts OFF")
+		notify("Ngực OFF")
 	else
-		-- Lớn + rõ hơn (gần kiểu video)
-		local l, w1 = createPart("LBreast", Vector3.new(1.6, 1.45, 1.35), CFrame.new(-0.58, 0.55, -0.78), torso, nil, Vector3.new(1.1, 1.0, 1.05))
-		local r, w2 = createPart("RBreast", Vector3.new(1.6, 1.45, 1.35), CFrame.new(0.58, 0.55, -0.78), torso, nil, Vector3.new(1.1, 1.0, 1.05))
+		local skin = getSkinColor()
+		local nippleCol = Color3.fromRGB(math.clamp(skin.R*255 - 40, 80, 255), math.clamp(skin.G*255 - 60, 60, 200), math.clamp(skin.B*255 - 40, 60, 200))
 
-		-- Soft under
-		local l2, w3 = createPart("LBreastSoft", Vector3.new(1.25, 0.85, 1.0), CFrame.new(-0.5, 0.1, -0.55), torso, Color3.fromRGB(255, 195, 180), Vector3.new(1, 0.75, 0.95))
-		local r2, w4 = createPart("RBreastSoft", Vector3.new(1.25, 0.85, 1.0), CFrame.new(0.5, 0.1, -0.55), torso, Color3.fromRGB(255, 195, 180), Vector3.new(1, 0.75, 0.95))
+		-- Ngực chính (to, gợi cảm)
+		local l, w1 = createPart("LBreast", Vector3.new(1.9, 1.7, 1.6), CFrame.new(-0.65, 0.55, -0.9), torso, skin, Vector3.new(1.2, 1.1, 1.15))
+		local r, w2 = createPart("RBreast", Vector3.new(1.9, 1.7, 1.6), CFrame.new(0.65, 0.55, -0.9), torso, skin, Vector3.new(1.2, 1.1, 1.15))
 
-		breastParts = {l, r, l2, r2, w1, w2, w3, w4}
+		-- Soft dưới
+		local l2 = createPart("LBreastSoft", Vector3.new(1.5, 1.0, 1.2), CFrame.new(-0.58, 0.05, -0.65), torso, skin, Vector3.new(1.1, 0.85, 1.05))
+		local r2 = createPart("RBreastSoft", Vector3.new(1.5, 1.0, 1.2), CFrame.new(0.58, 0.05, -0.65), torso, skin, Vector3.new(1.1, 0.85, 1.05))
+
+		-- Núm
+		local nl = createPart("LNipple", Vector3.new(0.32, 0.32, 0.25), CFrame.new(-0.65, 0.52, -1.6), torso, nippleCol, Vector3.new(1, 1, 0.85))
+		local nr = createPart("RNipple", Vector3.new(0.32, 0.32, 0.25), CFrame.new(0.65, 0.52, -1.6), torso, nippleCol, Vector3.new(1, 1, 0.85))
+
+		breastParts = {l, r, l2, r2, nl, nr}
 		state.breast = true
-		notify("Breasts ON")
+		notify("Ngực ON (màu da)")
 	end
 end
 
+--// ========== BUTT ==========
 local function toggleButt()
 	if not getChar() then return end
 	if state.butt then
 		clearTable(buttParts)
 		state.butt = false
-		notify("Butt OFF")
+		notify("Mông OFF")
 	else
-		local l, w1 = createPart("LButt", Vector3.new(1.55, 1.4, 1.35), CFrame.new(-0.5, -0.65, 0.85), torso, Color3.fromRGB(255, 190, 175), Vector3.new(1.05, 1.0, 1.0))
-		local r, w2 = createPart("RButt", Vector3.new(1.55, 1.4, 1.35), CFrame.new(0.5, -0.65, 0.85), torso, Color3.fromRGB(255, 190, 175), Vector3.new(1.05, 1.0, 1.0))
+		local skin = getSkinColor()
 
-		local l2, w3 = createPart("LButtSoft", Vector3.new(1.25, 0.85, 1.05), CFrame.new(-0.45, -1.05, 0.6), torso, Color3.fromRGB(255, 180, 165), Vector3.new(1, 0.8, 0.95))
-		local r2, w4 = createPart("RButtSoft", Vector3.new(1.25, 0.85, 1.05), CFrame.new(0.45, -1.05, 0.6), torso, Color3.fromRGB(255, 180, 165), Vector3.new(1, 0.8, 0.95))
+		local l = createPart("LButt", Vector3.new(1.75, 1.6, 1.55), CFrame.new(-0.55, -0.75, 1.0), torso, skin, Vector3.new(1.15, 1.1, 1.1))
+		local r = createPart("RButt", Vector3.new(1.75, 1.6, 1.55), CFrame.new(0.55, -0.75, 1.0), torso, skin, Vector3.new(1.15, 1.1, 1.1))
 
-		buttParts = {l, r, l2, r2, w1, w2, w3, w4}
+		local l2 = createPart("LButtSoft", Vector3.new(1.4, 0.95, 1.2), CFrame.new(-0.5, -1.2, 0.7), torso, skin, Vector3.new(1.05, 0.9, 1.0))
+		local r2 = createPart("RButtSoft", Vector3.new(1.4, 0.95, 1.2), CFrame.new(0.5, -1.2, 0.7), torso, skin, Vector3.new(1.05, 0.9, 1.0))
+
+		buttParts = {l, r, l2, r2}
 		state.butt = true
-		notify("Butt ON")
+		notify("Mông ON (màu da)")
 	end
 end
 
---// ========== PHYSICS ==========
+--// ========== GENITALS (Âm đạo + Hậu môn + Rốn) ==========
+local function toggleGenitals()
+	if not getChar() then return end
+	if state.genitals then
+		clearTable(genitalParts)
+		state.genitals = false
+		notify("Genitals OFF")
+	else
+		local skin = getSkinColor()
+		local pink = Color3.fromRGB(255, 150, 160)
+		local dark = Color3.fromRGB(40, 20, 25)
+
+		-- Rốn
+		local navel = createPart("Navel", Vector3.new(0.22, 0.18, 0.12), CFrame.new(0, -0.35, -0.72), torso, dark, Vector3.new(1, 0.8, 0.7))
+
+		-- Âm đạo (khe)
+		local vagina = createPart("Vagina", Vector3.new(0.55, 0.7, 0.35), CFrame.new(0, -1.05, -0.55), torso, pink, Vector3.new(0.9, 1.1, 0.7))
+		local vaginaInner = createPart("VaginaInner", Vector3.new(0.35, 0.5, 0.25), CFrame.new(0, -1.08, -0.65), torso, Color3.fromRGB(180, 80, 100), Vector3.new(0.8, 1, 0.6))
+
+		-- Hậu môn
+		local anus = createPart("Anus", Vector3.new(0.38, 0.38, 0.28), CFrame.new(0, -1.15, 0.75), torso, dark, Vector3.new(1, 1, 0.75))
+
+		genitalParts = {navel, vagina, vaginaInner, anus}
+		state.genitals = true
+		notify("Âm đạo + Hậu môn + Rốn ON")
+	end
+end
+
+--// ========== PHYSICS (jiggle nhẹ) ==========
 local function setPhysics(on)
 	if physConn then physConn:Disconnect() physConn = nil end
 	state.physics = on
-	if not on then notify("Physics OFF") return end
+	if not on then return end
 
-	notify("Physics ON")
 	local t = 0
 	physConn = RunService.RenderStepped:Connect(function(dt)
 		t = t + dt
-		local function jiggle(parts, power)
-			for i = 1, #parts, 2 do
-				local part = parts[i]
-				local weld = parts[i+1]
-				if part and weld and weld:IsA("Weld") then
-					local offset = CFrame.new(
-						math.sin(t * 5.5 + i) * 0.04 * power,
-						math.cos(t * 4.2 + i) * 0.03 * power,
-						math.sin(t * 3.8 + i) * 0.02 * power
-					)
-					weld.C0 = weld.C0:Lerp(weld.C0 * offset, 0.25)
-				end
+		local power = state.physicsPower
+		for _, p in ipairs(breastParts) do
+			if p:IsA("Part") and p:FindFirstChildOfClass("Weld") then
+				local w = p:FindFirstChildOfClass("Weld")
+				local base = w.C0
+				w.C0 = base * CFrame.new(0, math.sin(t * 7 + p.Name:len()) * power * 0.6, 0)
 			end
 		end
-		if state.breast then jiggle(breastParts, 1.1) end
-		if state.butt then jiggle(buttParts, 1.0) end
+		for _, p in ipairs(buttParts) do
+			if p:IsA("Part") and p:FindFirstChildOfClass("Weld") then
+				local w = p:FindFirstChildOfClass("Weld")
+				local base = w.C0
+				w.C0 = base * CFrame.new(0, math.sin(t * 6 + 1) * power * 0.5, 0)
+			end
+		end
 	end)
+	notify("Physics " .. (on and "ON" or "OFF"))
 end
 
---// ========== POSES (R6 only - ổn định) ==========
+--// ========== POSE SYSTEM ==========
 local function stopPose()
 	if poseConn then poseConn:Disconnect() poseConn = nil end
 	state.pose = "None"
-	pcall(function()
-		if humanoid then
-			humanoid.PlatformStand = false
-			humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+	if humanoid then
+		humanoid.PlatformStand = false
+		humanoid.AutoRotate = true
+	end
+	-- restore motors nếu có
+	for motor, c0 in pairs(originalMotors) do
+		if motor and motor.Parent then
+			motor.C0 = c0
 		end
-	end)
+	end
+	table.clear(originalMotors)
+	zeroVel()
 	notify("Reset tư thế")
 end
 
-local function applyPose(name)
+local function applyPose(poseName)
 	if not getChar() then return end
 	stopPose()
-
-	-- Dừng animation
-	pcall(function()
-		for _, track in ipairs(humanoid:GetPlayingAnimationTracks()) do
-			track:Stop(0)
-		end
-	end)
-
-	state.pose = name
+	state.pose = poseName
 	humanoid.PlatformStand = true
-	notify("Pose: " .. name)
+	humanoid.AutoRotate = false
+
+	-- Lưu motor gốc
+	for _, m in ipairs(character:GetDescendants()) do
+		if m:IsA("Motor6D") then
+			originalMotors[m] = m.C0
+		end
+	end
 
 	poseConn = RunService.RenderStepped:Connect(function()
-		if not character or not character.Parent or not root or not torso then
-			stopPose()
-			return
-		end
+		if not getChar() then return end
+		zeroVel()
 
-		zeroVel(root)
-		zeroVel(torso)
-		for _, part in ipairs(character:GetChildren()) do
-			if part:IsA("BasePart") then zeroVel(part) end
-		end
+		if isR15 then
+			-- R15 chi tiết
+			local upperTorso = character:FindFirstChild("UpperTorso")
+			local lowerTorso = character:FindFirstChild("LowerTorso")
+			local leftUpperLeg = character:FindFirstChild("LeftUpperLeg")
+			local rightUpperLeg = character:FindFirstChild("RightUpperLeg")
+			local leftLowerLeg = character:FindFirstChild("LeftLowerLeg")
+			local rightLowerLeg = character:FindFirstChild("RightLowerLeg")
+			local leftFoot = character:FindFirstChild("LeftFoot")
+			local rightFoot = character:FindFirstChild("RightFoot")
+			local leftUpperArm = character:FindFirstChild("LeftUpperArm")
+			local rightUpperArm = character:FindFirstChild("RightUpperArm")
 
-		local base = root.CFrame
-		local ll = character:FindFirstChild("Left Leg")
-		local rl = character:FindFirstChild("Right Leg")
-		local la = character:FindFirstChild("Left Arm")
-		local ra = character:FindFirstChild("Right Arm")
+			if poseName == "All Fours" then -- bò
+				if upperTorso then upperTorso.CFrame = root.CFrame * CFrame.new(0, -0.8, 0) * CFrame.Angles(math.rad(-20), 0, 0) end
+				if lowerTorso then lowerTorso.CFrame = root.CFrame * CFrame.new(0, -1.4, 0.3) * CFrame.Angles(math.rad(15), 0, 0) end
+				if leftUpperLeg then leftUpperLeg.CFrame = root.CFrame * CFrame.new(-0.5, -1.6, 0.8) * CFrame.Angles(math.rad(70), 0, math.rad(-10)) end
+				if rightUpperLeg then rightUpperLeg.CFrame = root.CFrame * CFrame.new(0.5, -1.6, 0.8) * CFrame.Angles(math.rad(70), 0, math.rad(10)) end
+			elseif poseName == "Squat" then -- ngồi xổm
+				if upperTorso then upperTorso.CFrame = root.CFrame * CFrame.new(0, -0.6, 0) * CFrame.Angles(math.rad(10), 0, 0) end
+				if lowerTorso then lowerTorso.CFrame = root.CFrame * CFrame.new(0, -1.3, 0) * CFrame.Angles(math.rad(-20), 0, 0) end
+				if leftUpperLeg then leftUpperLeg.CFrame = root.CFrame * CFrame.new(-0.45, -1.5, 0.2) * CFrame.Angles(math.rad(100), 0, math.rad(-15)) end
+				if rightUpperLeg then rightUpperLeg.CFrame = root.CFrame * CFrame.new(0.45, -1.5, 0.2) * CFrame.Angles(math.rad(100), 0, math.rad(15)) end
+			elseif poseName == "Sit Spread" then -- ngồi dang chân
+				if upperTorso then upperTorso.CFrame = root.CFrame * CFrame.new(0, -0.9, 0) * CFrame.Angles(math.rad(5), 0, 0) end
+				if lowerTorso then lowerTorso.CFrame = root.CFrame * CFrame.new(0, -1.6, 0) end
+				if leftUpperLeg then leftUpperLeg.CFrame = root.CFrame * CFrame.new(-0.7, -1.7, 0.1) * CFrame.Angles(math.rad(85), 0, math.rad(-35)) end
+				if rightUpperLeg then rightUpperLeg.CFrame = root.CFrame * CFrame.new(0.7, -1.7, 0.1) * CFrame.Angles(math.rad(85), 0, math.rad(35)) end
+			end
+		else
+			-- R6 đơn giản
+			local leftLeg = character:FindFirstChild("Left Leg")
+			local rightLeg = character:FindFirstChild("Right Leg")
+			local leftArm = character:FindFirstChild("Left Arm")
+			local rightArm = character:FindFirstChild("Right Arm")
 
-		if name == "Doggy" then -- Bò
-			torso.CFrame = base * CFrame.new(0, 0.15, 0) * CFrame.Angles(math.rad(55), 0, 0)
-			if ll then ll.CFrame = base * CFrame.new(-0.5, -1.0, 0.35) * CFrame.Angles(math.rad(-40), math.rad(15), 0) end
-			if rl then rl.CFrame = base * CFrame.new(0.5, -1.0, 0.35) * CFrame.Angles(math.rad(-40), math.rad(-15), 0) end
-			if la then la.CFrame = base * CFrame.new(-1.0, 0.2, 0.6) * CFrame.Angles(math.rad(-70), 0, math.rad(25)) end
-			if ra then ra.CFrame = base * CFrame.new(1.0, 0.2, 0.6) * CFrame.Angles(math.rad(-70), 0, math.rad(-25)) end
-
-		elseif name == "Squat" then -- Ngồi xổm
-			torso.CFrame = base * CFrame.new(0, -0.3, 0) * CFrame.Angles(math.rad(10), 0, 0)
-			if ll then ll.CFrame = base * CFrame.new(-0.45, -0.9, 0.25) * CFrame.Angles(math.rad(-85), math.rad(12), 0) end
-			if rl then rl.CFrame = base * CFrame.new(0.45, -0.9, 0.25) * CFrame.Angles(math.rad(-85), math.rad(-12), 0) end
-
-		elseif name == "Sit" then -- Ngồi xuống
-			torso.CFrame = base * CFrame.new(0, -0.7, 0) * CFrame.Angles(math.rad(5), 0, 0)
-			if ll then ll.CFrame = base * CFrame.new(-0.4, -0.5, 0.7) * CFrame.Angles(math.rad(-90), math.rad(10), 0) end
-			if rl then rl.CFrame = base * CFrame.new(0.4, -0.5, 0.7) * CFrame.Angles(math.rad(-90), math.rad(-10), 0) end
-
-		elseif name == "Spread" then -- Dang rộng chân
-			torso.CFrame = base * CFrame.new(0, 0, 0)
-			if ll then ll.CFrame = base * CFrame.new(-0.85, -1.0, 0) * CFrame.Angles(math.rad(-5), math.rad(40), 0) end
-			if rl then rl.CFrame = base * CFrame.new(0.85, -1.0, 0) * CFrame.Angles(math.rad(-5), math.rad(-40), 0) end
+			if poseName == "All Fours" then
+				torso.CFrame = root.CFrame * CFrame.new(0, -0.9, 0) * CFrame.Angles(math.rad(-25), 0, 0)
+				if leftLeg then leftLeg.CFrame = root.CFrame * CFrame.new(-0.5, -1.5, 0.9) * CFrame.Angles(math.rad(80), 0, 0) end
+				if rightLeg then rightLeg.CFrame = root.CFrame * CFrame.new(0.5, -1.5, 0.9) * CFrame.Angles(math.rad(80), 0, 0) end
+			elseif poseName == "Squat" then
+				torso.CFrame = root.CFrame * CFrame.new(0, -0.7, 0) * CFrame.Angles(math.rad(8), 0, 0)
+				if leftLeg then leftLeg.CFrame = root.CFrame * CFrame.new(-0.5, -1.4, 0.2) * CFrame.Angles(math.rad(95), 0, math.rad(-12)) end
+				if rightLeg then rightLeg.CFrame = root.CFrame * CFrame.new(0.5, -1.4, 0.2) * CFrame.Angles(math.rad(95), 0, math.rad(12)) end
+			elseif poseName == "Sit Spread" then
+				torso.CFrame = root.CFrame * CFrame.new(0, -1.0, 0)
+				if leftLeg then leftLeg.CFrame = root.CFrame * CFrame.new(-0.75, -1.5, 0.1) * CFrame.Angles(math.rad(90), 0, math.rad(-40)) end
+				if rightLeg then rightLeg.CFrame = root.CFrame * CFrame.new(0.75, -1.5, 0.1) * CFrame.Angles(math.rad(90), 0, math.rad(40)) end
+			end
 		end
 	end)
+	notify("Pose: " .. poseName)
 end
 
---// ========== SEX TOY (hình dương vật) ==========
+--// ========== SEX TOY (dương vật) ==========
 local function removeToy()
 	if rideConn then rideConn:Disconnect() rideConn = nil end
-	if moanSound then
-		moanSound:Stop()
-		moanSound:Destroy()
-		moanSound = nil
-	end
-	if toyPart and toyPart.Parent then toyPart:Destroy() end
-	toyPart = nil
+	if toyModel then toyModel:Destroy() toyModel = nil end
 	state.toyActive = false
-	if humanoid then humanoid.PlatformStand = false end
+	if humanoid then
+		humanoid.PlatformStand = false
+		humanoid.AutoRotate = true
+	end
+	zeroVel()
 	notify("Toy removed")
 end
 
-local function createDildo()
-	local toy = Instance.new("Part")
-	toy.Name = "SexToy"
-	toy.Size = Vector3.new(0.45, 1.8, 0.45)
-	toy.Color = Color3.fromRGB(255, 160, 170)
-	toy.Material = Enum.Material.SmoothPlastic
-	toy.CanCollide = false
-	toy.Anchored = true
-	toy.CastShadow = true
+local function createPenisToy()
+	local model = Instance.new("Model")
+	model.Name = "PenisToy"
 
+	-- Thân
+	local shaft = Instance.new("Part")
+	shaft.Name = "Shaft"
+	shaft.Size = Vector3.new(0.55, 2.4, 0.55)
+	shaft.Color = Color3.fromRGB(255, 200, 180)
+	shaft.Material = Enum.Material.SmoothPlastic
+	shaft.CanCollide = false
+	shaft.Anchored = true
 	local mesh = Instance.new("SpecialMesh")
 	mesh.MeshType = Enum.MeshType.Cylinder
-	mesh.Parent = toy
+	mesh.Scale = Vector3.new(1, 1, 1)
+	mesh.Parent = shaft
+	shaft.Parent = model
 
-	-- Đầu dương vật
+	-- Đầu
 	local head = Instance.new("Part")
 	head.Name = "Head"
-	head.Size = Vector3.new(0.55, 0.55, 0.55)
-	head.Color = Color3.fromRGB(255, 140, 155)
+	head.Size = Vector3.new(0.7, 0.7, 0.7)
+	head.Color = Color3.fromRGB(255, 160, 150)
 	head.Material = Enum.Material.SmoothPlastic
 	head.CanCollide = false
 	head.Anchored = true
-	head.Parent = toy
+	local hmesh = Instance.new("SpecialMesh")
+	hmesh.MeshType = Enum.MeshType.Sphere
+	hmesh.Scale = Vector3.new(1.1, 0.9, 1.1)
+	hmesh.Parent = head
+	head.Parent = model
 
-	local headMesh = Instance.new("SpecialMesh")
-	headMesh.MeshType = Enum.MeshType.Sphere
-	headMesh.Parent = head
+	-- Hai tinh hoàn
+	local ball1 = Instance.new("Part")
+	ball1.Size = Vector3.new(0.55, 0.55, 0.55)
+	ball1.Color = Color3.fromRGB(255, 190, 170)
+	ball1.Material = Enum.Material.SmoothPlastic
+	ball1.CanCollide = false
+	ball1.Anchored = true
+	local bmesh1 = Instance.new("SpecialMesh")
+	bmesh1.MeshType = Enum.MeshType.Sphere
+	bmesh1.Parent = ball1
+	ball1.Parent = model
 
-	local weld = Instance.new("Weld")
-	weld.Part0 = toy
-	weld.Part1 = head
-	weld.C0 = CFrame.new(0, 0.95, 0)
-	weld.Parent = head
+	local ball2 = ball1:Clone()
+	ball2.Parent = model
 
-	return toy
+	model.PrimaryPart = shaft
+	return model, shaft, head, ball1, ball2
 end
 
 local function placeToy()
 	if not getChar() then return end
 	removeToy()
 
-	local toy = createDildo()
-	toy.Parent = workspace
+	local model, shaft, head, ball1, ball2 = createPenisToy()
+	toyModel = model
 
-	local cam = workspace.CurrentCamera
-	local unitRay = cam:ScreenPointToRay(cam.ViewportSize.X/2, cam.ViewportSize.Y/2)
-	local params = RaycastParams.new()
-	params.FilterDescendantsInstances = {character}
-	params.FilterType = Enum.RaycastFilterType.Exclude
+	-- Raycast đặt xuống đất
+	local ray = workspace:Raycast(root.Position, Vector3.new(0, -10, 0))
+	local pos = ray and ray.Position or (root.Position - Vector3.new(0, 3, 0))
 
-	local result = workspace:Raycast(unitRay.Origin, unitRay.Direction * 70, params)
-	if result then
-		toy.CFrame = CFrame.new(result.Position + Vector3.new(0, 0.95, 0))
-	else
-		toy.CFrame = root.CFrame * CFrame.new(0, -2.5, -2.5)
-	end
+	shaft.CFrame = CFrame.new(pos + Vector3.new(0, 1.2, 0)) * CFrame.Angles(0, 0, math.rad(90))
+	head.CFrame = shaft.CFrame * CFrame.new(0, 1.35, 0)
+	ball1.CFrame = shaft.CFrame * CFrame.new(0, -1.1, 0.35)
+	ball2.CFrame = shaft.CFrame * CFrame.new(0, -1.1, -0.35)
 
-	toyPart = toy
-	notify("Đã đặt Dildo")
+	model.Parent = workspace
+	notify("Đã đặt Dildo (dương vật)")
 end
 
+--// ========== RIDE (ngồi xổm từ từ + rên) ==========
 local function startRide()
-	if not toyPart or not getChar() or state.toyActive then return end
+	if not toyModel or not getChar() then
+		notify("Chưa có toy!")
+		return
+	end
+	if rideConn then rideConn:Disconnect() end
+
 	state.toyActive = true
-	stopPose()
 	humanoid.PlatformStand = true
+	humanoid.AutoRotate = false
 
-	-- Tiếng rên (bạn có thể thay SoundId khác)
-	moanSound = Instance.new("Sound")
-	moanSound.SoundId = "rbxassetid://9048376835" -- tiếng rên mẫu (có thể đổi)
-	moanSound.Volume = 0.7
-	moanSound.Looped = true
-	moanSound.Parent = root
-	moanSound:Play()
+	-- Sound rên (placeholder - bạn thay ID thật)
+	local sound = Instance.new("Sound")
+	sound.SoundId = "rbxassetid://0" -- <-- thay bằng ID tiếng rên thật
+	sound.Volume = 1.5
+	sound.Looped = true
+	sound.Parent = root
+	sound:Play()
 
-	local baseCF = toyPart.CFrame
 	local t = 0
+	local startY = root.Position.Y
+	local targetY = toyModel.PrimaryPart.Position.Y + 1.6
 
 	rideConn = RunService.RenderStepped:Connect(function(dt)
-		if not character or not character.Parent or not toyPart or not root then
-			removeToy()
-			return
-		end
+		if not getChar() or not toyModel then return end
 		t = t + dt
-		zeroVel(root)
-		zeroVel(torso)
+		zeroVel()
 
-		local height = math.sin(t * 6.5) * 0.32 + 0.15
-		local target = baseCF * CFrame.new(0, 1.25 + height, 0) * CFrame.Angles(math.rad(-12), 0, 0)
+		-- Ngồi xổm từ từ (ease)
+		local progress = math.clamp(t / 1.8, 0, 1) -- 1.8 giây ngồi xuống
+		local ease = 1 - (1 - progress) ^ 2
+		local currentY = startY + (targetY - startY) * ease
 
-		root.CFrame = target
-		torso.CFrame = target * CFrame.new(0, 0.5, 0)
+		-- Nhấp nhẹ sau khi ngồi xong
+		local bob = 0
+		if progress >= 1 then
+			bob = math.sin((t - 1.8) * 5.5) * 0.28
+		end
 
-		local ll = character:FindFirstChild("Left Leg")
-		local rl = character:FindFirstChild("Right Leg")
-		if ll then ll.CFrame = target * CFrame.new(-0.45, -0.7, 0.15) * CFrame.Angles(math.rad(-75), 10, 0) end
-		if rl then rl.CFrame = target * CFrame.new(0.45, -0.7, 0.15) * CFrame.Angles(math.rad(-75), -10, 0) end
+		root.CFrame = CFrame.new(toyModel.PrimaryPart.Position.X, currentY + bob, toyModel.PrimaryPart.Position.Z)
+			* CFrame.Angles(0, root.CFrame.LookVector.Y, 0)
+
+		-- Ép tư thế ngồi xổm
+		if isR15 then
+			-- R15 sẽ được applyPose hỗ trợ thêm nếu cần
+		else
+			local leftLeg = character:FindFirstChild("Left Leg")
+			local rightLeg = character:FindFirstChild("Right Leg")
+			if leftLeg then leftLeg.CFrame = root.CFrame * CFrame.new(-0.5, -1.3, 0.15) * CFrame.Angles(math.rad(100), 0, math.rad(-15)) end
+			if rightLeg then rightLeg.CFrame = root.CFrame * CFrame.new(0.5, -1.3, 0.15) * CFrame.Angles(math.rad(100), 0, math.rad(15)) end
+		end
 	end)
+
+	notify("Bắt đầu ngồi xổm + rên")
 end
 
 --// ========== MENU ==========
 local function createMenu()
 	if gui then gui:Destroy() end
 	gui = Instance.new("ScreenGui")
-	gui.Name = "R34_R6"
+	gui.Name = "R34Menu"
 	gui.ResetOnSpawn = false
 	gui.Parent = player:WaitForChild("PlayerGui")
 
-	mainFrame = Instance.new("Frame")
-	mainFrame.Size = UDim2.new(0, 190, 0, 380)
-	mainFrame.Position = UDim2.new(0, 12, 0.5, -190)
-	mainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+	mainFrame = Instance.new("ScrollingFrame")
+	mainFrame.Size = UDim2.new(0, 240, 0, 420)
+	mainFrame.Position = UDim2.new(0, 20, 0.5, -210)
+	mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
 	mainFrame.BorderSizePixel = 0
+	mainFrame.ScrollBarThickness = 6
+	mainFrame.CanvasSize = UDim2.new(0, 0, 0, 700)
 	mainFrame.Visible = false
 	mainFrame.Parent = gui
-	Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 8)
 
-	local title = Instance.new("TextLabel")
-	title.Size = UDim2.new(1, 0, 0, 28)
-	title.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
-	title.Text = "R34 R6 Only"
-	title.TextColor3 = Color3.fromRGB(255, 120, 170)
-	title.Font = Enum.Font.GothamBold
-	title.TextSize = 14
-	title.Parent = mainFrame
-	Instance.new("UICorner", title).CornerRadius = UDim.new(0, 8)
+	local layout = Instance.new("UIListLayout")
+	layout.Padding = UDim.new(0, 6)
+	layout.Parent = mainFrame
 
-	local scroll = Instance.new("ScrollingFrame")
-	scroll.Size = UDim2.new(1, -8, 1, -34)
-	scroll.Position = UDim2.new(0, 4, 0, 30)
-	scroll.BackgroundTransparency = 1
-	scroll.ScrollBarThickness = 3
-	scroll.CanvasSize = UDim2.new(0, 0, 0, 420)
-	scroll.Parent = mainFrame
-
-	local list = Instance.new("UIListLayout")
-	list.Padding = UDim.new(0, 4)
-	list.Parent = scroll
-
-	local function btn(text, func)
+	local function btn(text, callback)
 		local b = Instance.new("TextButton")
-		b.Size = UDim2.new(1, 0, 0, 28)
-		b.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+		b.Size = UDim2.new(1, -12, 0, 34)
+		b.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
+		b.TextColor3 = Color3.new(1, 1, 1)
 		b.Text = text
-		b.TextColor3 = Color3.fromRGB(230, 230, 230)
-		b.Font = Enum.Font.Gotham
-		b.TextSize = 13
-		b.Parent = scroll
-		Instance.new("UICorner", b).CornerRadius = UDim.new(0, 6)
-		b.MouseButton1Click:Connect(func)
+		b.Font = Enum.Font.GothamBold
+		b.TextSize = 14
+		b.Parent = mainFrame
+		b.MouseButton1Click:Connect(callback)
 	end
 
-	btn("Cởi quần áo", stripClothes)
+	btn("--- CƠ THỂ ---", function() end)
+	btn("Cởi đồ", stripClothes)
 	btn("Bật/Tắt Ngực", toggleBreast)
 	btn("Bật/Tắt Mông", toggleButt)
-	btn("Bật/Tắt Vật lý", function() setPhysics(not state.physics) end)
+	btn("Bật/Tắt Âm đạo + Hậu môn + Rốn", toggleGenitals)
+	btn("Bật/Tắt Physics", function() setPhysics(not state.physics) end)
 
-	btn("--- Tư thế ---", function() end)
-	btn("Bò (Doggy)", function() applyPose("Doggy") end)
-	btn("Ngồi xổm", function() applyPose("Squat") end)
-	btn("Ngồi xuống", function() applyPose("Sit") end)
-	btn("Dang rộng chân", function() applyPose("Spread") end)
+	btn("--- TƯ THẾ ---", function() end)
+	btn("Bò (All Fours)", function() applyPose("All Fours") end)
+	btn("Ngồi xổm (Squat)", function() applyPose("Squat") end)
+	btn("Ngồi dang chân", function() applyPose("Sit Spread") end)
 	btn("Reset tư thế", stopPose)
 
-	btn("--- Đồ chơi ---", function() end)
-	btn("Đặt Dildo", placeToy)
-	btn("Bắt đầu nhấp + rên", startRide)
+	btn("--- SEX TOY ---", function() end)
+	btn("Đặt Dildo (dương vật)", placeToy)
+	btn("Ngồi lên + rên", startRide)
 	btn("Dừng + Xóa toy", removeToy)
 end
 
 --// ========== INIT ==========
 UserInputService.InputBegan:Connect(function(input, gp)
 	if gp then return end
-	if input.KeyCode == Enum.KeyCode.P then
+	if input.KeyCode == Enum.KeyCode.R then
 		if mainFrame then mainFrame.Visible = not mainFrame.Visible end
 	end
 end)
@@ -442,16 +513,19 @@ player.CharacterAdded:Connect(function()
 	state.stripped = false
 	state.breast = false
 	state.butt = false
+	state.genitals = false
 	state.physics = false
+	state.pose = "None"
 	clearTable(breastParts)
 	clearTable(buttParts)
+	clearTable(genitalParts)
 	stopPose()
 	removeToy()
 	if physConn then physConn:Disconnect() physConn = nil end
-	notify("Character ready (R6)")
+	notify("Character ready")
 end)
 
-task.wait(0.6)
+task.wait(0.5)
 getChar()
 createMenu()
-notify("R6 Script loaded | Press P")
+notify("Script loaded | Press R to open menu")
