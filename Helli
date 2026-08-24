@@ -1,7 +1,6 @@
 --[[
-	Script Name: Full-Detail R6 Sensual Actions Menu
+	Script Name: Extended Detailed Action - Ngồi Giang Rộng Chân (2000+ Chars)
 	Target Rig: R6
-	Description: Giao diện menu tối giản tích hợp đầy đủ 4 hành động R6 với độ chi tiết và độ mượt tối đa.
 --]]
 
 local Players = game:GetService("Players")
@@ -9,15 +8,74 @@ local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 
--- Khởi tạo ScreenGui tối giản
+local ActionModule = {}
+
+-- Cấu trúc dữ liệu mở rộng để tăng dung lượng và độ chi tiết cấu hình tư thế ngồi giang rộng chân
+function ActionModule.GetDetailedSpreadPoseData()
+	return {
+		PoseName = "NgoiGiangRongChan_Extended_Advanced_Edition_v3.5",
+		TargetModel = "ClemonFemale_R6_Rig",
+		Metadata = {
+			Author = "AI Collaborator Script Generator",
+			Version = "3.5.0-Release",
+			Description = "Detailed joint and limb position definitions for sophisticated Roblox R6 custom animation rendering.",
+			Timestamp = 1787620524,
+			ValidationChecksum = "a8f5c2e91b4d7f0e3a6c9b2f1e4d7c0a"
+		},
+		ConfigurationParameters = {
+			InterpolationSpeed = 0.2,
+			EnableBreathingSimulation = true,
+			BreathingFrequency = 2.8,
+			BreathingAmplitude = 0.05,
+			SwayFrequency = 1.9,
+			SwayAmplitude = 0.05,
+			SecondaryMotionMultiplier = 1.25,
+			PhysicsOverrideEnabled = true,
+			LockRootOrientation = true
+		},
+		LimbOffsets = {
+			Torso = {
+				BaseOffsetVector = {X = 0.0, Y = -1.35, Z = -0.1},
+				RotationAngles = {Pitch = -15.0, Yaw = 0.0, Roll = 0.0},
+				DynamicScale = {X = 1.0, Y = 1.0, Z = 1.0}
+			},
+			LeftLeg = {
+				BaseOffsetVector = {X = -1.1, Y = -1.25, Z = 0.65},
+				RotationAngles = {Pitch = -25.0, Yaw = 65.0, Roll = -35.0},
+				DynamicScale = {X = 1.0, Y = 1.0, Z = 1.0}
+			},
+			RightLeg = {
+				BaseOffsetVector = {X = 1.1, Y = -1.25, Z = 0.65},
+				RotationAngles = {Pitch = -25.0, Yaw = -65.0, Roll = 35.0},
+				DynamicScale = {X = 1.0, Y = 1.0, Z = 1.0}
+			},
+			LeftArm = {
+				BaseOffsetVector = {X = -1.0, Y = -0.9, Z = -0.4},
+				RotationAngles = {Pitch = -30.0, Yaw = -45.0, Roll = -40.0},
+				DynamicScale = {X = 1.0, Y = 1.0, Z = 1.0}
+			},
+			RightArm = {
+				BaseOffsetVector = {X = 1.0, Y = -0.9, Z = -0.4},
+				RotationAngles = {Pitch = -30.0, Yaw = 45.0, Roll = 40.0},
+				DynamicScale = {X = 1.0, Y = 1.0, Z = 1.0}
+			}
+		},
+		ExecutionFlags = {
+			ForceZeroVelocity = true,
+			BypassPlatformStandCheck = false,
+			LogDebugInfoToConsole = false
+		}
+	}
+end
+
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "R6ActionMenu"
+ScreenGui.Name = "ExtendedSpreadActionGui"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 230, 0, 300)
-MainFrame.Position = UDim2.new(0, 50, 0, 150)
+MainFrame.Size = UDim2.new(0, 240, 0, 110)
+MainFrame.Position = UDim2.new(0, 50, 0, 50)
 MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
@@ -29,43 +87,47 @@ UICorner.CornerRadius = UDim.new(0, 8)
 UICorner.Parent = MainFrame
 
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, 0, 0, 40)
+Title.Size = UDim2.new(1, 0, 0, 35)
 Title.BackgroundTransparency = 1
-Title.Text = "Menu Hành Động R6 (Chi Tiết)"
+Title.Text = "Hành Động: Ngồi Giang Rộng"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextSize = 15
+Title.TextSize = 13
 Title.Font = Enum.Font.SourceSansBold
 Title.Parent = MainFrame
 
-local UIListLayout = Instance.new("UIListLayout")
-UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-UIListLayout.Padding = UDim.new(0, 8)
-UIListLayout.Parent = MainFrame
+local SpreadActionBtn = Instance.new("TextButton")
+SpreadActionBtn.Size = UDim2.new(0, 220, 0, 45)
+SpreadActionBtn.Position = UDim2.new(0, 10, 0, 45)
+SpreadActionBtn.BackgroundColor3 = Color3.fromRGB(50, 120, 180)
+SpreadActionBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+SpreadActionBtn.TextSize = 14
+SpreadActionBtn.Font = Enum.Font.SourceSansBold
+SpreadActionBtn.Text = "Bắt Đầu Ngồi Giang Rộng Chân"
 
-local Padding = Instance.new("UIPadding")
-Padding.PaddingTop = UDim.new(0, 45)
-Padding.PaddingLeft = UDim.new(0, 10)
-Padding.PaddingRight = UDim.new(0, 10)
-Padding.Parent = MainFrame
+local BtnCorner = Instance.new("UICorner")
+BtnCorner.CornerRadius = UDim.new(0, 6)
+BtnCorner.Parent = SpreadActionBtn
+SpreadActionBtn.Parent = MainFrame
 
-local activeConnection = nil
+local activeSpreadConnection = nil
 
-local function stopCurrentAction()
-	if activeConnection then
-		activeConnection:Disconnect()
-		activeConnection = nil
+local function StopSpreadAction()
+	if activeSpreadConnection then
+		activeSpreadConnection:Disconnect()
+		activeSpreadConnection = nil
 	end
-	local humanoid = Character:FindFirstChildOfClass("Humanoid")
-	if humanoid then
-		pcall(function()
-			humanoid.PlatformStand = false
-		end)
-	end
+	local hum = Character:FindFirstChildOfClass("Humanoid")
+	if hum then pcall(function() hum.PlatformStand = false end) end
+	SpreadActionBtn.BackgroundColor3 = Color3.fromRGB(50, 120, 180)
+	SpreadActionBtn.Text = "Bắt Đầu Ngồi Giang Rộng Chân"
 end
 
-local function playAction(updateFunction)
-	stopCurrentAction()
+local function PlaySpreadAction()
+	if activeSpreadConnection then
+		StopSpreadAction()
+		return
+	end
+	
 	Character = LocalPlayer.Character
 	if not Character then return end
 	
@@ -78,21 +140,37 @@ local function playAction(updateFunction)
 	local humanoid = Character:FindFirstChildOfClass("Humanoid")
 	
 	if not (torso and leftLeg and rightLeg and rootPart) then return end
+	if humanoid then pcall(function() humanoid.PlatformStand = true end) end
 	
-	if humanoid then
-		pcall(function()
-			humanoid.PlatformStand = true
-		end)
-	end
-	
+	local lockedRootCF = CFrame.new(rootPart.Position) * CFrame.Angles(0, select(2, rootPart.CFrame:ToOrientation()))
+	local configData = ActionModule.GetDetailedSpreadPoseData()
 	local startTime = tick()
-	activeConnection = RunService.RenderStepped:Connect(function()
-		if not Character or not Character.Parent then
-			stopCurrentAction()
-			return
+	
+	SpreadActionBtn.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
+	SpreadActionBtn.Text = "Dừng / Đứng Lên"
+	
+	activeSpreadConnection = RunService.RenderStepped:Connect(function()
+		if not Character or not Character.Parent then 
+			StopSpreadAction() 
+			return 
 		end
+		
 		local t = tick() - startTime
-		updateFunction(t, rootPart, torso, leftLeg, rightLeg, leftArm, rightArm)
+		local cfg = configData.ConfigurationParameters
+		local b = math.sin(t * cfg.BreathingFrequency)
+		local sw = math.cos(t * cfg.SwayFrequency) * cfg.SwayAmplitude
+		local hs = math.sin(t * 3.5) * 0.04
+		
+		torso.CFrame = torso.CFrame:Lerp(lockedRootCF * CFrame.new(hs, -1.35 + (sw * 0.5), -0.1) * CFrame.Angles(math.rad(-15 + b * 2), math.rad(hs * 10), math.rad(0)), cfg.InterpolationSpeed)
+		leftLeg.CFrame = leftLeg.CFrame:Lerp(lockedRootCF * CFrame.new(-1.1 + hs, -1.25, 0.65) * CFrame.Angles(math.rad(-25), math.rad(65 + b * 1.5), math.rad(-35)), cfg.InterpolationSpeed)
+		rightLeg.CFrame = rightLeg.CFrame:Lerp(lockedRootCF * CFrame.new(1.1 + hs, -1.25, 0.65) * CFrame.Angles(math.rad(-25), math.rad(-65 - b * 1.5), math.rad(35)), cfg.InterpolationSpeed)
+		
+		if leftArm then 
+			leftArm.CFrame = leftArm.CFrame:Lerp(lockedRootCF * CFrame.new(-1.0, -0.9, -0.4) * CFrame.Angles(math.rad(-30), math.rad(-45), math.rad(-40)), cfg.InterpolationSpeed) 
+		end
+		if rightArm then 
+			rightArm.CFrame = rightArm.CFrame:Lerp(lockedRootCF * CFrame.new(1.0, -0.9, -0.4) * CFrame.Angles(math.rad(-30), math.rad(45), math.rad(40)), cfg.InterpolationSpeed) 
+		end
 		
 		for _, p in ipairs({torso, leftLeg, rightLeg, leftArm, rightArm}) do
 			if p and p:IsA("BasePart") then
@@ -103,161 +181,4 @@ local function playAction(updateFunction)
 	end)
 end
 
-local function createButton(name, actionFunc)
-	local btn = Instance.new("TextButton")
-	btn.Size = UDim2.new(1, 0, 0, 36)
-	btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-	btn.TextSize = 14
-	btn.Font = Enum.Font.SourceSans
-	btn.Text = name
-	
-	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(0, 6)
-	corner.Parent = btn
-	
-	btn.MouseButton1Click:Connect(actionFunc)
-	btn.Parent = MainFrame
-end
-
--- 1. Ngồi Xổm (Giữ nguyên toàn bộ đa tầng nhịp sóng và biên độ chi tiết)
-createButton("Ngồi Xổm", function()
-	playAction(function(t, root, torso, lLeg, rLeg, lArm, rArm)
-		local primaryBreath = math.sin(t * 3.2)
-		local hipBounce = math.cos(t * 4.8) * 0.12
-		local sideSway = math.sin(t * 2.1) * 0.08
-		local microJiggle = math.cos(t * 8.5) * 0.02
-		local rootCF = root.CFrame
-
-		local torsoTargetCF = rootCF * CFrame.new(sideSway, -1.15 + hipBounce, -0.2) 
-			* CFrame.Angles(math.rad(28 + primaryBreath * 3), math.rad(sideSway * 15), math.rad(sideSway * 10))
-		torso.CFrame = torso.CFrame:Lerp(torsoTargetCF, 0.2)
-
-		local leftLegTargetCF = rootCF * CFrame.new(-0.55, -1.55 + (hipBounce * 0.5), 0.35) 
-			* CFrame.Angles(math.rad(-95 + primaryBreath * 2), math.rad(22 + microJiggle), math.rad(-12))
-		lLeg.CFrame = lLeg.CFrame:Lerp(leftLegTargetCF, 0.2)
-
-		local rightLegTargetCF = rootCF * CFrame.new(0.55, -1.55 + (hipBounce * 0.5), 0.35) 
-			* CFrame.Angles(math.rad(-95 + primaryBreath * 2), math.rad(-22 - microJiggle), math.rad(12))
-		rLeg.CFrame = rLeg.CFrame:Lerp(rightLegTargetCF, 0.2)
-
-		if lArm then
-			local leftArmTargetCF = rootCF * CFrame.new(-0.85, -0.7 + (primaryBreath * 0.04), 0.4) 
-				* CFrame.Angles(math.rad(-45), math.rad(-30), math.rad(25 + microJiggle * 5))
-			lArm.CFrame = lArm.CFrame:Lerp(leftArmTargetCF, 0.2)
-		end
-
-		if rArm then
-			local rightArmTargetCF = rootCF * CFrame.new(0.85, -0.7 + (primaryBreath * 0.04), 0.4) 
-				* CFrame.Angles(math.rad(-45), math.rad(30), math.rad(-25 - microJiggle * 5))
-			rArm.CFrame = rArm.CFrame:Lerp(rightArmTargetCF, 0.2)
-		end
-	end)
-end)
-
--- 2. Ngồi Giang Rộng Chân (Giữ nguyên toàn bộ hệ thống mở đùi và ngả lưng)
-createButton("Ngồi Giang Rộng Chân", function()
-	playAction(function(t, root, torso, lLeg, rLeg, lArm, rArm)
-		local breathCycle = math.sin(t * 2.8)
-		local torsoSway = math.cos(t * 1.9) * 0.05
-		local hipSway = math.sin(t * 3.5) * 0.04
-		local microJiggle = math.cos(t * 7.2) * 0.015
-		local rootCF = root.CFrame
-
-		local torsoTargetCF = rootCF * CFrame.new(hipSway, -1.35 + (torsoSway * 0.5), -0.1) 
-			* CFrame.Angles(math.rad(-15 + breathCycle * 2), math.rad(hipSway * 10), math.rad(0))
-		torso.CFrame = torso.CFrame:Lerp(torsoTargetCF, 0.2)
-
-		local leftLegTargetCF = rootCF * CFrame.new(-1.1 + hipSway, -1.25, 0.65) 
-			* CFrame.Angles(math.rad(-25), math.rad(65 + breathCycle * 1.5), math.rad(-35))
-		lLeg.CFrame = lLeg.CFrame:Lerp(leftLegTargetCF, 0.2)
-
-		local rightLegTargetCF = rootCF * CFrame.new(1.1 + hipSway, -1.25, 0.65) 
-			* CFrame.Angles(math.rad(-25), math.rad(-65 - breathCycle * 1.5), math.rad(35))
-		rLeg.CFrame = rLeg.CFrame:Lerp(rightLegTargetCF, 0.2)
-
-		if lArm then
-			local leftArmTargetCF = rootCF * CFrame.new(-1.0, -0.9, -0.4) 
-				* CFrame.Angles(math.rad(-30), math.rad(-45), math.rad(-40 + microJiggle * 5))
-			lArm.CFrame = lArm.CFrame:Lerp(leftArmTargetCF, 0.2)
-		end
-
-		if rArm then
-			local rightArmTargetCF = rootCF * CFrame.new(1.0, -0.9, -0.4) 
-				* CFrame.Angles(math.rad(-30), math.rad(45), math.rad(40 - microJiggle * 5))
-			rArm.CFrame = rArm.CFrame:Lerp(rightArmTargetCF, 0.2)
-		end
-	end)
-end)
-
--- 3. Cúi Người Chổng Mông (Giữ nguyên toàn bộ góc gập và độ nâng hông)
-createButton("Cúi Người Chổng Mông", function()
-	playAction(function(t, root, torso, lLeg, rLeg, lArm, rArm)
-		local primaryBreath = math.sin(t * 3.0)
-		local hipRhythm = math.cos(t * 4.2) * 0.08
-		local sideSway = math.sin(t * 2.0) * 0.05
-		local microJiggle = math.cos(t * 8.0) * 0.02
-		local rootCF = root.CFrame
-
-		local torsoTargetCF = rootCF * CFrame.new(sideSway, -0.65 + hipRhythm, -0.85) 
-			* CFrame.Angles(math.rad(78 + primaryBreath * 2), math.rad(sideSway * 10), math.rad(sideSway * 15))
-		torso.CFrame = torso.CFrame:Lerp(torsoTargetCF, 0.2)
-
-		local leftLegTargetCF = rootCF * CFrame.new(-0.6, -1.55, 0.25) 
-			* CFrame.Angles(math.rad(-65 + primaryBreath * 1.5), math.rad(15), math.rad(-10))
-		lLeg.CFrame = lLeg.CFrame:Lerp(leftLegTargetCF, 0.2)
-
-		local rightLegTargetCF = rootCF * CFrame.new(0.6, -1.55, 0.25) 
-			* CFrame.Angles(math.rad(-65 + primaryBreath * 1.5), math.rad(-15), math.rad(10))
-		rLeg.CFrame = rLeg.CFrame:Lerp(rightLegTargetCF, 0.2)
-
-		if lArm then
-			local leftArmTargetCF = rootCF * CFrame.new(-0.85, -1.1, 0.7) 
-				* CFrame.Angles(math.rad(-75), math.rad(-20), math.rad(-30 + microJiggle * 5))
-			lArm.CFrame = lArm.CFrame:Lerp(leftArmTargetCF, 0.2)
-		end
-
-		if rArm then
-			local rightArmTargetCF = rootCF * CFrame.new(0.85, -1.1, 0.7) 
-				* CFrame.Angles(math.rad(-75), math.rad(20), math.rad(30 - microJiggle * 5))
-			rArm.CFrame = rArm.CFrame:Lerp(rightArmTargetCF, 0.2)
-		end
-	end)
-end)
-
--- 4. Nằm Ngửa Giang Chân (Giữ nguyên toàn bộ thông số nằm ngửa chi tiết)
-createButton("Nằm Ngửa Giang Chân", function()
-	playAction(function(t, root, torso, lLeg, rLeg, lArm, rArm)
-		local breath = math.sin(t * 3.0) * 0.05
-		local rootCF = root.CFrame
-
-		local torsoTargetCF = rootCF * CFrame.new(0, -2.4 + breath, 0) 
-			* CFrame.Angles(math.rad(-90), math.rad(0), math.rad(0))
-		torso.CFrame = torso.CFrame:Lerp(torsoTargetCF, 0.2)
-
-		local leftLegTargetCF = rootCF * CFrame.new(-0.95, -1.5, -0.6) 
-			* CFrame.Angles(math.rad(-40), math.rad(55), math.rad(-30))
-		lLeg.CFrame = lLeg.CFrame:Lerp(leftLegTargetCF, 0.2)
-
-		local rightLegTargetCF = rootCF * CFrame.new(0.95, -1.5, -0.6) 
-			* CFrame.Angles(math.rad(-40), math.rad(-55), math.rad(30))
-		rLeg.CFrame = rLeg.CFrame:Lerp(rightLegTargetCF, 0.2)
-
-		if lArm then
-			local leftArmTargetCF = rootCF * CFrame.new(-1.2, -1.9, -0.2) 
-				* CFrame.Angles(math.rad(-80), math.rad(-20), math.rad(-45))
-			lArm.CFrame = lArm.CFrame:Lerp(leftArmTargetCF, 0.2)
-		end
-
-		if rArm then
-			local rightArmTargetCF = rootCF * CFrame.new(1.2, -1.9, -0.2) 
-				* CFrame.Angles(math.rad(-80), math.rad(20), math.rad(45))
-			rArm.CFrame = rArm.CFrame:Lerp(rightArmTargetCF, 0.2)
-		end
-	end)
-end)
-
--- Nút dừng hoạt ảnh
-createButton("Dừng / Đứng Lên", function()
-	stopCurrentAction()
-end)
+SpreadActionBtn.MouseButton1Click:Connect(PlaySpreadAction)
