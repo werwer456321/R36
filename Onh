@@ -1,39 +1,74 @@
--- ====================== CLEMONRC + BUTTON + FIX ======================
+-- ====================== CLEMONRC + FIX CHỒNG NGỰC + NÚT O ======================
 loadstring(game:HttpGet("https://raw.githubusercontent.com/clemonlang/clemon_roclothes/refs/heads/main/ClemonRC.lua"))()
 
--- Fix ngực bị mất
+-- ========== FIX CHỒNG NGỰC & QUẦN ÁO ==========
 task.spawn(function()
     local player = game.Players.LocalPlayer
+    local UIS = game:GetService("UserInputService")
 
-    local function forceShowBreasts(char)
+    local function cleanBreasts(char, isNude)
         if not char then return end
+
+        local breastParts = {}
         for _, v in pairs(char:GetDescendants()) do
             if v:IsA("BasePart") or v:IsA("MeshPart") then
                 local name = string.lower(v.Name)
-                if name:find("breast") or name:find("boob") or name:find("nipple") or name:find("areola") or name:find("breastsroot") then
-                    v.Transparency = 0
-                    v.LocalTransparencyModifier = 0
+                if name:find("breast") or name:find("boob") or name:find("nipple") 
+                or name:find("areola") or name:find("breastsroot") or name:find("breasttexture") then
+                    table.insert(breastParts, v)
                 end
+            end
+        end
+
+        if isNude then
+            -- Khi khỏa thân: chỉ giữ 1 bộ ngực sạch, xóa phần trùng
+            local kept = false
+            for _, part in ipairs(breastParts) do
+                if not kept and (part.Name:find("Right") or part.Name:find("Left") or part.Name:find("BreastsRoot")) then
+                    part.Transparency = 0
+                    part.LocalTransparencyModifier = 0
+                    kept = true
+                else
+                    -- Ẩn phần bị trùng
+                    part.Transparency = 1
+                    part.LocalTransparencyModifier = 1
+                end
+            end
+        else
+            -- Khi có quần áo: ẩn hết ngực custom để tránh lộ
+            for _, part in ipairs(breastParts) do
+                part.Transparency = 1
+                part.LocalTransparencyModifier = 1
             end
         end
     end
 
+    -- Theo dõi trạng thái nude
+    local isCurrentlyNude = false
+
+    -- Bắt phím C (cả từ nút O)
+    UIS.InputBegan:Connect(function(input, gp)
+        if gp then return end
+        if input.KeyCode == Enum.KeyCode.C then
+            task.wait(0.15) -- đợi ClemonRC xử lý xong
+            isCurrentlyNude = not isCurrentlyNude
+            if player.Character then
+                cleanBreasts(player.Character, isCurrentlyNude)
+            end
+        end
+    end)
+
+    -- Chạy lần đầu
     if player.Character then
-        task.wait(1.2)
-        forceShowBreasts(player.Character)
+        task.wait(2)
+        cleanBreasts(player.Character, false)
     end
 
     player.CharacterAdded:Connect(function(char)
-        task.wait(1.8)
-        forceShowBreasts(char)
+        task.wait(2.2)
+        isCurrentlyNude = false
+        cleanBreasts(char, false)
     end)
-
-    while true do
-        task.wait(2.5)
-        if player.Character then
-            forceShowBreasts(player.Character)
-        end
-    end
 end)
 
 -- ====================== NÚT O (NHỎ + ẤN 2 LẦN) ======================
@@ -54,9 +89,9 @@ screenGui.Parent = playerGui
 
 local button = Instance.new("TextButton")
 button.Name = "OButton"
-button.Size = UDim2.new(0, 42, 0, 42)          -- nhỏ hơn
-button.Position = UDim2.new(0.88, 0, 0.78, 0)
-button.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+button.Size = UDim2.new(0, 40, 0, 40)
+button.Position = UDim2.new(0.87, 0, 0.77, 0)
+button.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
 button.Text = "O"
 button.TextColor3 = Color3.fromRGB(255, 255, 255)
 button.TextScaled = true
@@ -66,12 +101,12 @@ button.Active = true
 button.Parent = screenGui
 
 local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 10)
+corner.CornerRadius = UDim.new(0, 9)
 corner.Parent = button
 
 local stroke = Instance.new("UIStroke")
 stroke.Thickness = 2
-stroke.Color = Color3.fromRGB(60, 140, 255)
+stroke.Color = Color3.fromRGB(70, 150, 255)
 stroke.Parent = button
 
 local UserInputService = game:GetService("UserInputService")
@@ -80,49 +115,43 @@ local VirtualInputManager = game:GetService("VirtualInputManager")
 local originalPos = button.Position
 local lastClickTime = 0
 local clickCount = 0
-local DOUBLE_CLICK_TIME = 0.35   -- thời gian cho phép ấn 2 lần
+local DOUBLE_CLICK_TIME = 0.32
 
 local function setPressed(pressed)
     if pressed then
-        button.BackgroundColor3 = Color3.fromRGB(0, 90, 200)
-        button.TextColor3 = Color3.fromRGB(255, 255, 120)
+        button.BackgroundColor3 = Color3.fromRGB(0, 95, 210)
+        button.TextColor3 = Color3.fromRGB(255, 255, 130)
         button.Position = originalPos + UDim2.new(0, 0, 0, 3)
     else
-        button.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+        button.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
         button.TextColor3 = Color3.fromRGB(255, 255, 255)
         button.Position = originalPos
     end
 end
 
--- Ấn 2 lần liên tục mới gửi phím C
 button.MouseButton1Click:Connect(function()
     local now = tick()
-    
     if now - lastClickTime <= DOUBLE_CLICK_TIME then
-        clickCount = clickCount + 1
+        clickCount += 1
     else
         clickCount = 1
     end
-    
     lastClickTime = now
-    
+
     if clickCount >= 2 then
         clickCount = 0
-        
-        -- Gửi phím C
         VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.C, false, game)
-        task.wait(0.05)
+        task.wait(0.04)
         VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.C, false, game)
-        
-        -- Hiệu ứng nhấn
+
         setPressed(true)
-        task.delay(0.12, function()
+        task.delay(0.11, function()
             setPressed(false)
         end)
     end
 end)
 
--- Kéo được
+-- Kéo nút
 local dragging = false
 local dragStart, startPos
 
@@ -138,10 +167,7 @@ end)
 UserInputService.InputChanged:Connect(function(input)
     if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
         local delta = input.Position - dragStart
-        button.Position = UDim2.new(
-            startPos.X.Scale, startPos.X.Offset + delta.X,
-            startPos.Y.Scale, startPos.Y.Offset + delta.Y
-        )
+        button.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
         originalPos = button.Position
     end
 end)
@@ -152,5 +178,5 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
-print("✅ ClemonRC + Nút O (nhỏ + ấn 2 lần) đã sẵn sàng")
+print("✅ Đã load - Nút O nhỏ + ấn 2 lần + Fix chồng ngực")
 ]])()
