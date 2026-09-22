@@ -1,55 +1,156 @@
-local Players = game:GetService("Players")
+-- ====================== CLEMONRC + BUTTON + FIX ======================
+loadstring(game:HttpGet("https://raw.githubusercontent.com/clemonlang/clemon_roclothes/refs/heads/main/ClemonRC.lua"))()
 
-local function applyExtremeCurvyBody(character)
-	local humanoid = character:WaitForChild("Humanoid", 8)
-	if not humanoid then 
-		warn("No se encontró el Humanoid")
-		return 
-	end
+-- Fix ngực bị mất
+task.spawn(function()
+    local player = game.Players.LocalPlayer
 
-	-- Esperamos a que la apariencia del personaje esté completamente cargada
-	if not character:FindFirstChild("HumanoidRootPart") then
-		character:WaitForChild("HumanoidRootPart", 5)
-	end
+    local function forceShowBreasts(char)
+        if not char then return end
+        for _, v in pairs(char:GetDescendants()) do
+            if v:IsA("BasePart") or v:IsA("MeshPart") then
+                local name = string.lower(v.Name)
+                if name:find("breast") or name:find("boob") or name:find("nipple") or name:find("areola") or name:find("breastsroot") then
+                    v.Transparency = 0
+                    v.LocalTransparencyModifier = 0
+                end
+            end
+        end
+    end
 
-	task.wait(0.6) -- Tiempo extra para que cargue bien
+    if player.Character then
+        task.wait(1.2)
+        forceShowBreasts(player.Character)
+    end
 
-	local success, description = pcall(function()
-		return humanoid:GetAppliedDescription()
-	end)
+    player.CharacterAdded:Connect(function(char)
+        task.wait(1.8)
+        forceShowBreasts(char)
+    end)
 
-	if not success or not description then
-		warn("No se pudo obtener la descripción del personaje")
-		return
-	end
-
-	-- Valores extremos
-	description.BodyTypeScale = 1.9
-	descrption.BodyTypeScale = 1.0
-	description.ProportionScale = 1.0
-	description.WidthScale = 0.79
-	description.DepthScale = 1.0
-	description.HeightScale = 0.89
-	description.HeightScale = 0.80
-	-- Aplicamos la descripción de forma segura
-	local applySuccess, err = pcall(function()
-		humanoid:ApplyDescription(description)
-	end)
-
-	if not applySuccess then
-		warn("Error al aplicar la descripción:", err)
-	end
-end
-
--- Conexión principal
-Players.PlayerAdded:Connect(function(player)
-	player.CharacterAdded:Connect(function(character)
-		applyExtremeCurvyBody(character)
-	end)
-
-	-- Por si el personaje ya existe cuando se conecta el jugador
-	if player.Character then
-		applyExtremeCurvyBody(player.Character)
-	end
+    while true do
+        task.wait(2.5)
+        if player.Character then
+            forceShowBreasts(player.Character)
+        end
+    end
 end)
 
+-- ====================== NÚT O (NHỎ + ẤN 2 LẦN) ======================
+loadstring([[
+local player = game.Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+if playerGui:FindFirstChild("SimpleCButton") then
+    playerGui.SimpleCButton:Destroy()
+end
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "SimpleCButton"
+screenGui.ResetOnSpawn = false
+screenGui.IgnoreGuiInset = true
+screenGui.DisplayOrder = 999
+screenGui.Parent = playerGui
+
+local button = Instance.new("TextButton")
+button.Name = "OButton"
+button.Size = UDim2.new(0, 42, 0, 42)          -- nhỏ hơn
+button.Position = UDim2.new(0.88, 0, 0.78, 0)
+button.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+button.Text = "O"
+button.TextColor3 = Color3.fromRGB(255, 255, 255)
+button.TextScaled = true
+button.Font = Enum.Font.GothamBold
+button.BorderSizePixel = 0
+button.Active = true
+button.Parent = screenGui
+
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 10)
+corner.Parent = button
+
+local stroke = Instance.new("UIStroke")
+stroke.Thickness = 2
+stroke.Color = Color3.fromRGB(60, 140, 255)
+stroke.Parent = button
+
+local UserInputService = game:GetService("UserInputService")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+
+local originalPos = button.Position
+local lastClickTime = 0
+local clickCount = 0
+local DOUBLE_CLICK_TIME = 0.35   -- thời gian cho phép ấn 2 lần
+
+local function setPressed(pressed)
+    if pressed then
+        button.BackgroundColor3 = Color3.fromRGB(0, 90, 200)
+        button.TextColor3 = Color3.fromRGB(255, 255, 120)
+        button.Position = originalPos + UDim2.new(0, 0, 0, 3)
+    else
+        button.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+        button.TextColor3 = Color3.fromRGB(255, 255, 255)
+        button.Position = originalPos
+    end
+end
+
+-- Ấn 2 lần liên tục mới gửi phím C
+button.MouseButton1Click:Connect(function()
+    local now = tick()
+    
+    if now - lastClickTime <= DOUBLE_CLICK_TIME then
+        clickCount = clickCount + 1
+    else
+        clickCount = 1
+    end
+    
+    lastClickTime = now
+    
+    if clickCount >= 2 then
+        clickCount = 0
+        
+        -- Gửi phím C
+        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.C, false, game)
+        task.wait(0.05)
+        VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.C, false, game)
+        
+        -- Hiệu ứng nhấn
+        setPressed(true)
+        task.delay(0.12, function()
+            setPressed(false)
+        end)
+    end
+end)
+
+-- Kéo được
+local dragging = false
+local dragStart, startPos
+
+button.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = button.Position
+        originalPos = button.Position
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - dragStart
+        button.Position = UDim2.new(
+            startPos.X.Scale, startPos.X.Offset + delta.X,
+            startPos.Y.Scale, startPos.Y.Offset + delta.Y
+        )
+        originalPos = button.Position
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = false
+    end
+end)
+
+print("✅ ClemonRC + Nút O (nhỏ + ấn 2 lần) đã sẵn sàng")
+]])()
