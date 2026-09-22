@@ -1,61 +1,67 @@
--- ====================== CLEMONRC + FIX CHỒNG NGỰC (KHÔNG ẨN) ======================
+-- ====================== CLEMONRC + FIX CHỈ KHI MẶC ĐỒ ======================
 loadstring(game:HttpGet("https://raw.githubusercontent.com/clemonlang/clemon_roclothes/refs/heads/main/ClemonRC.lua"))()
 
--- ========== FIX CHỒNG NGỰC (GIỮ MODEL, CHỈ XÓA TRÙNG) ==========
 task.spawn(function()
     local player = game.Players.LocalPlayer
+    local UIS = game:GetService("UserInputService")
 
-    local function fixDuplicateBreasts(char)
+    local function isNude(char)
+        if not char then return true end
+        -- Kiểm tra xem có Shirt hoặc Pants không
+        local hasShirt = char:FindFirstChildOfClass("Shirt")
+        local hasPants = char:FindFirstChildOfClass("Pants")
+        local hasTShirt = char:FindFirstChildOfClass("ShirtGraphic")
+        
+        -- Nếu không có quần áo nào → đang nude
+        if not hasShirt and not hasPants and not hasTShirt then
+            return true
+        end
+        return false
+    end
+
+    local function updateBreasts(char)
         if not char then return end
 
-        local breasts = {}
+        local nude = isNude(char)
+
         for _, v in pairs(char:GetDescendants()) do
             if v:IsA("BasePart") or v:IsA("MeshPart") then
                 local name = string.lower(v.Name)
                 if name:find("breast") or name:find("boob") or name:find("nipple") 
-                or name:find("areola") or name:find("breastsroot") then
-                    table.insert(breasts, v)
-                end
-            end
-        end
-
-        -- Ép hiện tất cả ngực Clemon
-        for _, part in ipairs(breasts) do
-            part.Transparency = 0
-            part.LocalTransparencyModifier = 0
-        end
-
-        -- Nếu bị chồng quá nhiều thì ẩn bớt phần thừa (giữ lại phần chính)
-        if #breasts > 6 then
-            for i, part in ipairs(breasts) do
-                local name = string.lower(part.Name)
-                -- Chỉ ẩn những phần tên chung chung, giữ "Right Breasts", "Left Breasts", "BreastsRoot"
-                if not (name:find("right breast") or name:find("left breast") or name:find("breastsroot") or name:find("nipple")) then
-                    part.Transparency = 1
+                or name:find("areola") or name:find("breastsroot") or name:find("breasttexture") then
+                    
+                    if nude then
+                        -- Khỏa thân → hiện ngực
+                        v.Transparency = 0
+                        v.LocalTransparencyModifier = 0
+                    else
+                        -- Có quần áo → ẩn ngực custom
+                        v.Transparency = 1
+                        v.LocalTransparencyModifier = 1
+                    end
                 end
             end
         end
     end
 
-    -- Chạy sau khi load
+    -- Chạy lần đầu
     if player.Character then
         task.wait(2.5)
-        fixDuplicateBreasts(player.Character)
+        updateBreasts(player.Character)
     end
 
     player.CharacterAdded:Connect(function(char)
         task.wait(2.8)
-        fixDuplicateBreasts(char)
+        updateBreasts(char)
     end)
 
-    -- Chạy lại mỗi lần bấm C
-    local UIS = game:GetService("UserInputService")
+    -- Mỗi lần bấm C (hoặc nút O)
     UIS.InputBegan:Connect(function(input, gp)
         if gp then return end
         if input.KeyCode == Enum.KeyCode.C then
-            task.wait(0.3)
+            task.wait(0.35) -- đợi ClemonRC xử lý xong
             if player.Character then
-                fixDuplicateBreasts(player.Character)
+                updateBreasts(player.Character)
             end
         end
     end)
@@ -141,7 +147,6 @@ button.MouseButton1Click:Connect(function()
     end
 end)
 
--- Kéo nút
 local dragging = false
 local dragStart, startPos
 
@@ -168,5 +173,5 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
-print("✅ Đã load - Giữ model ngực + chỉ xóa phần chồng")
+print("✅ Đã load - Khỏa thân OK + Ẩn ngực khi mặc đồ")
 ]])()
