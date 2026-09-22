@@ -1,0 +1,55 @@
+local Players = game:GetService("Players")
+
+local function applyExtremeCurvyBody(character)
+	local humanoid = character:WaitForChild("Humanoid", 8)
+	if not humanoid then 
+		warn("No se encontró el Humanoid")
+		return 
+	end
+
+	-- Esperamos a que la apariencia del personaje esté completamente cargada
+	if not character:FindFirstChild("HumanoidRootPart") then
+		character:WaitForChild("HumanoidRootPart", 5)
+	end
+
+	task.wait(0.6) -- Tiempo extra para que cargue bien
+
+	local success, description = pcall(function()
+		return humanoid:GetAppliedDescription()
+	end)
+
+	if not success or not description then
+		warn("No se pudo obtener la descripción del personaje")
+		return
+	end
+
+	-- Valores extremos
+	description.BodyTypeScale = 1.9
+	descrption.BodyTypeScale = 1.0
+	description.ProportionScale = 1.0
+	description.WidthScale = 0.79
+	description.DepthScale = 1.0
+	description.HeightScale = 0.89
+	description.HeightScale = 0.80
+	-- Aplicamos la descripción de forma segura
+	local applySuccess, err = pcall(function()
+		humanoid:ApplyDescription(description)
+	end)
+
+	if not applySuccess then
+		warn("Error al aplicar la descripción:", err)
+	end
+end
+
+-- Conexión principal
+Players.PlayerAdded:Connect(function(player)
+	player.CharacterAdded:Connect(function(character)
+		applyExtremeCurvyBody(character)
+	end)
+
+	-- Por si el personaje ya existe cuando se conecta el jugador
+	if player.Character then
+		applyExtremeCurvyBody(player.Character)
+	end
+end)
+
