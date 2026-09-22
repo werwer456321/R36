@@ -1,73 +1,63 @@
--- ====================== CLEMONRC + FIX CHỒNG NGỰC + NÚT O ======================
+-- ====================== CLEMONRC + FIX CHỒNG NGỰC (KHÔNG ẨN) ======================
 loadstring(game:HttpGet("https://raw.githubusercontent.com/clemonlang/clemon_roclothes/refs/heads/main/ClemonRC.lua"))()
 
--- ========== FIX CHỒNG NGỰC & QUẦN ÁO ==========
+-- ========== FIX CHỒNG NGỰC (GIỮ MODEL, CHỈ XÓA TRÙNG) ==========
 task.spawn(function()
     local player = game.Players.LocalPlayer
-    local UIS = game:GetService("UserInputService")
 
-    local function cleanBreasts(char, isNude)
+    local function fixDuplicateBreasts(char)
         if not char then return end
 
-        local breastParts = {}
+        local breasts = {}
         for _, v in pairs(char:GetDescendants()) do
             if v:IsA("BasePart") or v:IsA("MeshPart") then
                 local name = string.lower(v.Name)
                 if name:find("breast") or name:find("boob") or name:find("nipple") 
-                or name:find("areola") or name:find("breastsroot") or name:find("breasttexture") then
-                    table.insert(breastParts, v)
+                or name:find("areola") or name:find("breastsroot") then
+                    table.insert(breasts, v)
                 end
             end
         end
 
-        if isNude then
-            -- Khi khỏa thân: chỉ giữ 1 bộ ngực sạch, xóa phần trùng
-            local kept = false
-            for _, part in ipairs(breastParts) do
-                if not kept and (part.Name:find("Right") or part.Name:find("Left") or part.Name:find("BreastsRoot")) then
-                    part.Transparency = 0
-                    part.LocalTransparencyModifier = 0
-                    kept = true
-                else
-                    -- Ẩn phần bị trùng
+        -- Ép hiện tất cả ngực Clemon
+        for _, part in ipairs(breasts) do
+            part.Transparency = 0
+            part.LocalTransparencyModifier = 0
+        end
+
+        -- Nếu bị chồng quá nhiều thì ẩn bớt phần thừa (giữ lại phần chính)
+        if #breasts > 6 then
+            for i, part in ipairs(breasts) do
+                local name = string.lower(part.Name)
+                -- Chỉ ẩn những phần tên chung chung, giữ "Right Breasts", "Left Breasts", "BreastsRoot"
+                if not (name:find("right breast") or name:find("left breast") or name:find("breastsroot") or name:find("nipple")) then
                     part.Transparency = 1
-                    part.LocalTransparencyModifier = 1
                 end
-            end
-        else
-            -- Khi có quần áo: ẩn hết ngực custom để tránh lộ
-            for _, part in ipairs(breastParts) do
-                part.Transparency = 1
-                part.LocalTransparencyModifier = 1
             end
         end
     end
 
-    -- Theo dõi trạng thái nude
-    local isCurrentlyNude = false
-
-    -- Bắt phím C (cả từ nút O)
-    UIS.InputBegan:Connect(function(input, gp)
-        if gp then return end
-        if input.KeyCode == Enum.KeyCode.C then
-            task.wait(0.15) -- đợi ClemonRC xử lý xong
-            isCurrentlyNude = not isCurrentlyNude
-            if player.Character then
-                cleanBreasts(player.Character, isCurrentlyNude)
-            end
-        end
-    end)
-
-    -- Chạy lần đầu
+    -- Chạy sau khi load
     if player.Character then
-        task.wait(2)
-        cleanBreasts(player.Character, false)
+        task.wait(2.5)
+        fixDuplicateBreasts(player.Character)
     end
 
     player.CharacterAdded:Connect(function(char)
-        task.wait(2.2)
-        isCurrentlyNude = false
-        cleanBreasts(char, false)
+        task.wait(2.8)
+        fixDuplicateBreasts(char)
+    end)
+
+    -- Chạy lại mỗi lần bấm C
+    local UIS = game:GetService("UserInputService")
+    UIS.InputBegan:Connect(function(input, gp)
+        if gp then return end
+        if input.KeyCode == Enum.KeyCode.C then
+            task.wait(0.3)
+            if player.Character then
+                fixDuplicateBreasts(player.Character)
+            end
+        end
     end)
 end)
 
@@ -178,5 +168,5 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
-print("✅ Đã load - Nút O nhỏ + ấn 2 lần + Fix chồng ngực")
+print("✅ Đã load - Giữ model ngực + chỉ xóa phần chồng")
 ]])()
