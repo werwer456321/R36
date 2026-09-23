@@ -1,177 +1,209 @@
--- ====================== CLEMONRC + FIX CHỈ KHI MẶC ĐỒ ======================
+-- ====================== CLEMON + FIX NGỰC (MÀU GIỐNG QUẦN ÁO) + NÚT O ======================
 loadstring(game:HttpGet("https://raw.githubusercontent.com/clemonlang/clemon_roclothes/refs/heads/main/ClemonRC.lua"))()
 
+-- ========== PHẦN FIX NGỰC ==========
 task.spawn(function()
     local player = game.Players.LocalPlayer
     local UIS = game:GetService("UserInputService")
 
+    local originalBreastColors = {}
+
     local function isNude(char)
         if not char then return true end
-        -- Kiểm tra xem có Shirt hoặc Pants không
         local hasShirt = char:FindFirstChildOfClass("Shirt")
         local hasPants = char:FindFirstChildOfClass("Pants")
         local hasTShirt = char:FindFirstChildOfClass("ShirtGraphic")
-        
-        -- Nếu không có quần áo nào → đang nude
-        if not hasShirt and not hasPants and not hasTShirt then
-            return true
-        end
-        return false
+        return not (hasShirt or hasPants or hasTShirt)
     end
 
-    local function updateBreasts(char)
+    local function getBodyColor(char)
+        local torso = char:FindFirstChild("Torso") or char:FindFirstChild("UpperTorso")
+        if torso and torso:IsA("BasePart") then
+            return torso.Color
+        end
+        return Color3.fromRGB(255, 204, 153)
+    end
+
+    local function cleanBreasts(char)
         if not char then return end
 
-        local nude = isNude(char)
+        local breastParts = {}
 
         for _, v in pairs(char:GetDescendants()) do
             if v:IsA("BasePart") or v:IsA("MeshPart") then
                 local name = string.lower(v.Name)
-                if name:find("breast") or name:find("boob") or name:find("nipple") 
-                or name:find("areola") or name:find("breastsroot") or name:find("breasttexture") then
-                    
-                    if nude then
-                        -- Khỏa thân → hiện ngực
-                        v.Transparency = 0
-                        v.LocalTransparencyModifier = 0
-                    else
-                        -- Có quần áo → ẩn ngực custom
-                        v.Transparency = 1
-                        v.LocalTransparencyModifier = 1
+                if name:find("breast") or name:find("boob") or name:find("nipple")
+                or name:find("areola") or name:find("breastsroot") or name:find("breasttexture")
+                or name:find("clemon") then
+                    table.insert(breastParts, v)
+                    if not originalBreastColors[v] then
+                        originalBreastColors[v] = v.Color
                     end
                 end
             end
         end
+
+        local nude = isNude(char)
+        local bodyColor = getBodyColor(char)
+
+        if nude then
+            -- Khỏa thân: chỉ giữ 1 bộ ngực + màu da gốc
+            local kept = false
+            for _, part in ipairs(breastParts) do
+                local n = string.lower(part.Name)
+                if not kept and (n:find("right") or n:find("left") or n:find("breastsroot") or n:find("clemon")) then
+                    part.Transparency = 0
+                    part.LocalTransparencyModifier = 0
+                    part.Color = originalBreastColors[part] or Color3.fromRGB(255, 204, 153)
+                    kept = true
+                else
+                    part.Transparency = 1
+                    part.LocalTransparencyModifier = 1
+                end
+            end
+        else
+            -- Mặc đồ: giữ ngực hiện + đổi màu giống thân (giống mông)
+            for _, part in ipairs(breastParts) do
+                part.Transparency = 0
+                part.LocalTransparencyModifier = 0
+                part.Color = bodyColor
+            end
+        end
     end
 
-    -- Chạy lần đầu
     if player.Character then
-        task.wait(2.5)
-        updateBreasts(player.Character)
+        task.wait(2.8)
+        cleanBreasts(player.Character)
     end
 
     player.CharacterAdded:Connect(function(char)
-        task.wait(2.8)
-        updateBreasts(char)
+        task.wait(3)
+        table.clear(originalBreastColors)
+        cleanBreasts(char)
     end)
 
-    -- Mỗi lần bấm C (hoặc nút O)
     UIS.InputBegan:Connect(function(input, gp)
         if gp then return end
         if input.KeyCode == Enum.KeyCode.C then
-            task.wait(0.35) -- đợi ClemonRC xử lý xong
+            task.wait(0.45)
             if player.Character then
-                updateBreasts(player.Character)
+                cleanBreasts(player.Character)
             end
         end
     end)
-end)
 
--- ====================== NÚT O (NHỎ + ẤN 2 LẦN) ======================
-loadstring([[
-local player = game.Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
-
-if playerGui:FindFirstChild("SimpleCButton") then
-    playerGui.SimpleCButton:Destroy()
-end
-
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "SimpleCButton"
-screenGui.ResetOnSpawn = false
-screenGui.IgnoreGuiInset = true
-screenGui.DisplayOrder = 999
-screenGui.Parent = playerGui
-
-local button = Instance.new("TextButton")
-button.Name = "OButton"
-button.Size = UDim2.new(0, 40, 0, 40)
-button.Position = UDim2.new(0.87, 0, 0.77, 0)
-button.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
-button.Text = "O"
-button.TextColor3 = Color3.fromRGB(255, 255, 255)
-button.TextScaled = true
-button.Font = Enum.Font.GothamBold
-button.BorderSizePixel = 0
-button.Active = true
-button.Parent = screenGui
-
-local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 9)
-corner.Parent = button
-
-local stroke = Instance.new("UIStroke")
-stroke.Thickness = 2
-stroke.Color = Color3.fromRGB(70, 150, 255)
-stroke.Parent = button
-
-local UserInputService = game:GetService("UserInputService")
-local VirtualInputManager = game:GetService("VirtualInputManager")
-
-local originalPos = button.Position
-local lastClickTime = 0
-local clickCount = 0
-local DOUBLE_CLICK_TIME = 0.32
-
-local function setPressed(pressed)
-    if pressed then
-        button.BackgroundColor3 = Color3.fromRGB(0, 95, 210)
-        button.TextColor3 = Color3.fromRGB(255, 255, 130)
-        button.Position = originalPos + UDim2.new(0, 0, 0, 3)
-    else
-        button.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
-        button.TextColor3 = Color3.fromRGB(255, 255, 255)
-        button.Position = originalPos
-    end
-end
-
-button.MouseButton1Click:Connect(function()
-    local now = tick()
-    if now - lastClickTime <= DOUBLE_CLICK_TIME then
-        clickCount += 1
-    else
-        clickCount = 1
-    end
-    lastClickTime = now
-
-    if clickCount >= 2 then
-        clickCount = 0
-        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.C, false, game)
-        task.wait(0.04)
-        VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.C, false, game)
-
-        setPressed(true)
-        task.delay(0.11, function()
-            setPressed(false)
-        end)
+    while true do
+        task.wait(2.5)
+        if player.Character then
+            cleanBreasts(player.Character)
+        end
     end
 end)
 
-local dragging = false
-local dragStart, startPos
+-- ========== NÚT O (NHỎ + KÉO ĐƯỢC + ẤN 2 LẦN) ==========
+task.spawn(function()
+    local player = game.Players.LocalPlayer
+    local playerGui = player:WaitForChild("PlayerGui")
+    local UIS = game:GetService("UserInputService")
+    local VIM = game:GetService("VirtualInputManager")
 
-button.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true
-        dragStart = input.Position
-        startPos = button.Position
-        originalPos = button.Position
+    if playerGui:FindFirstChild("SimpleCButton") then
+        playerGui.SimpleCButton:Destroy()
     end
-end)
 
-UserInputService.InputChanged:Connect(function(input)
-    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-        local delta = input.Position - dragStart
-        button.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-        originalPos = button.Position
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "SimpleCButton"
+    screenGui.ResetOnSpawn = false
+    screenGui.IgnoreGuiInset = true
+    screenGui.DisplayOrder = 999
+    screenGui.Parent = playerGui
+
+    local button = Instance.new("TextButton")
+    button.Name = "OButton"
+    button.Size = UDim2.new(0, 40, 0, 40)
+    button.Position = UDim2.new(0.87, 0, 0.77, 0)
+    button.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
+    button.Text = "O"
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.TextScaled = true
+    button.Font = Enum.Font.GothamBold
+    button.BorderSizePixel = 0
+    button.Active = true
+    button.Parent = screenGui
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 9)
+    corner.Parent = button
+
+    local stroke = Instance.new("UIStroke")
+    stroke.Thickness = 2
+    stroke.Color = Color3.fromRGB(70, 150, 255)
+    stroke.Parent = button
+
+    local originalPos = button.Position
+    local lastClickTime = 0
+    local clickCount = 0
+    local DOUBLE_CLICK_TIME = 0.32
+
+    local function setPressed(pressed)
+        if pressed then
+            button.BackgroundColor3 = Color3.fromRGB(0, 95, 210)
+            button.TextColor3 = Color3.fromRGB(255, 255, 130)
+            button.Position = originalPos + UDim2.new(0, 0, 0, 3)
+        else
+            button.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
+            button.TextColor3 = Color3.fromRGB(255, 255, 255)
+            button.Position = originalPos
+        end
     end
-end)
 
-UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = false
-    end
-end)
+    button.MouseButton1Click:Connect(function()
+        local now = tick()
+        if now - lastClickTime <= DOUBLE_CLICK_TIME then
+            clickCount = clickCount + 1
+        else
+            clickCount = 1
+        end
+        lastClickTime = now
 
-print("✅ Đã load - Khỏa thân OK + Ẩn ngực khi mặc đồ")
-]])()
+        if clickCount >= 2 then
+            clickCount = 0
+            VIM:SendKeyEvent(true, Enum.KeyCode.C, false, game)
+            task.wait(0.04)
+            VIM:SendKeyEvent(false, Enum.KeyCode.C, false, game)
+
+            setPressed(true)
+            task.delay(0.11, function()
+                setPressed(false)
+            end)
+        end
+    end)
+
+    local dragging = false
+    local dragStart, startPos
+
+    button.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = button.Position
+            originalPos = button.Position
+        end
+    end)
+
+    UIS.InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            local delta = input.Position - dragStart
+            button.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+            originalPos = button.Position
+        end
+    end)
+
+    UIS.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = false
+        end
+    end)
+
+    print("✅ Clemon + Fix ngực màu giống quần áo + Nút O đã sẵn sàng")
+end)
