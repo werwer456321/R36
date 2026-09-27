@@ -1,246 +1,406 @@
--- Slap Battles Multi Script (Cleaned V2.8)
--- Đã loại bỏ testRun + BypassAntiCheat bị chết
-
-local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/jensonhirst/Orion/main/source"))()
-
-local Window = OrionLib:MakeWindow({
-    Name = "Slap Battles Multi Script (Cleaned)",
-    HidePremium = false,
-    SaveConfig = true,
-    ConfigFolder = "TeleportConfig",
-    IntroEnabled = true,
-    IntroText = "Slap Battles Multi Script",
-    CloseCallback = function() end
-})
+-- Slap Battles Place Teleporter GUI (Tiếng Việt)
+-- Có cửa sổ, thu nhỏ, chú thích găng + thành tựu + phong cảnh
 
 local Players = game:GetService("Players")
 local TeleportService = game:GetService("TeleportService")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+
 local player = Players.LocalPlayer
-local username = player.Name
-local jobIdInput = ""
+local playerGui = player:WaitForChild("PlayerGui")
 
--- Tabs
-local HomeTab = Window:MakeTab({Name = "Home", Icon = "rbxassetid://4483345998", PremiumOnly = false})
-local TeleportsTab = Window:MakeTab({Name = "Teleports", Icon = "rbxassetid://4483345998", PremiumOnly = false})
-local FeaturesTab = Window:MakeTab({Name = "Features", Icon = "rbxassetid://4483345998", PremiumOnly = false})
-local GlovesTab = Window:MakeTab({Name = "Gloves", Icon = "rbxassetid://4483345998", PremiumOnly = false})
-local TrollTab = Window:MakeTab({Name = "Troll Stuff", Icon = "rbxassetid://4483345998", PremiumOnly = false})
-local FarmTab = Window:MakeTab({Name = "Farm Scripts", Icon = "rbxassetid://4483345998", PremiumOnly = false})
-local CombatTab = Window:MakeTab({Name = "Combat", Icon = "rbxassetid://4483345998", PremiumOnly = false})
-local ChangeLogTab = Window:MakeTab({Name = "Changelogs", Icon = "rbxassetid://4483345998", PremiumOnly = false})
-local CreditsTab = Window:MakeTab({Name = "Credits", Icon = "rbxassetid://4483345998", PremiumOnly = false})
-
-HomeTab:AddSection({Name = "Welcome, " .. username .. "!"})
-TeleportsTab:AddSection({Name = "Teleports"})
-FeaturesTab:AddSection({Name = "Useful Features"})
-GlovesTab:AddSection({Name = "Auto Get Gloves"})
-TrollTab:AddSection({Name = "Troll Scripts"})
-FarmTab:AddSection({Name = "Farm Scripts"})
-CombatTab:AddSection({Name = "Combat"})
-ChangeLogTab:AddSection({Name = "Update Changelogs"})
-CreditsTab:AddSection({Name = "Credits"})
-
--- ====================== GLOVES ======================
-local gloveScripts = {
-    ["Boxer Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/BoxerGlove.luau",
-    ["Clock Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/ClockGlove.luau",
-    ["Counter Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/CounterGlove.luau",
-    ["Elude Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/EludeGlove.luau",
-    ["Fan Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/FanGlove.luau",
-    ["Mouse Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/MouseGlove.luau",
-    ["Bind Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/BindGlove.luau",
-    ["Water Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/WaterGlove.luau",
-    ["Trap Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/TrapGlove.luau",
-    ["Hexa Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/HexaGlove.luau",
-    ["Hybrid Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/HybridGlove.luau",
-    ["Hunter Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/HunterGlove.luau",
-    ["Relude Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/ReludeGlove.luau",
-    ["Avatar & Hunter Gloves"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/AvatarAndHunterGloves.luau",
-    ["Avatar & Relude Gloves"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/AvatarAndReludeGloves.luau",
-    ["Metaverse Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/MetaverseGlove.luau",
-    ["Frostbite Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/FrostbiteGlove.luau",
-    ["Elude & Counter Gloves"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/EludeAndCounterGloves.luau",
-    ["Fan & Boxer Gloves"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/FanAndBoxerGloves.luau",
-    ["RNG Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/RNGGlove.luau",
-    ["Hitman Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/HitmanGlove.luau",
-    ["Bob Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/BobGlove.luau",
-    ["Kinetic Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/KineticGlove.luau",
-    ["Admin Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/AdminGlove.luau",
-    ["Sword Fighter Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/SwordfigterGlove.luau",
-    ["Eggler Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/EgglerGlove.luau",
-    ["UTG Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/UTGGlove.luau",
-    ["[REDACTED] Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/REDACTEDGlove.luau",
-    ["Link Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/LinkGlove.luau",
-    ["Chain Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/ChainGlove.luau",
-    ["Lamp Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/LampGlove.luau",
-    ["IceSkate Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/IceSkateGlove.luau",
-    ["Glovel Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/GlovelGlove.luau",
-    ["Knockoff Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/KnockoffGlove.luau",
-    ["Alchemist Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/AlchemistGlove.luau",
-    ["Buddies Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/BuddiesGlove.luau",
-    ["Angler Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/AnglerGlove.luau",
-    ["Spoonful Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/SpoonfulGlove.luau",
-    ["Voodoo Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/VoodooGlove.luau",
-    ["Fish Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/FishGlove.luau"
-}
-
-for name, link in pairs(gloveScripts) do
-    GlovesTab:AddButton({
-        Name = name,
-        Callback = function()
-            local success, err = pcall(function()
-                loadstring(game:HttpGet(link))()
-            end)
-            if not success then
-                OrionLib:MakeNotification({
-                    Name = "Lỗi",
-                    Content = name .. " đã chết hoặc lỗi",
-                    Time = 3
-                })
-            end
-        end
-    })
+-- Xóa GUI cũ nếu có
+if playerGui:FindFirstChild("SB_PlaceTP") then
+    playerGui.SB_PlaceTP:Destroy()
 end
 
--- ====================== FEATURES ======================
-FeaturesTab:AddTextbox({
-    Name = "Join Job ID",
-    Default = "",
-    TextDisappear = false,
-    Callback = function(Value)
-        jobIdInput = Value
-    end
-})
-
-FeaturesTab:AddButton({
-    Name = "Join Server with Job ID",
-    Callback = function()
-        if jobIdInput and jobIdInput \~= "" then
-            TeleportService:TeleportToPlaceInstance(game.PlaceId, jobIdInput, player)
-        end
-    end
-})
-
-FeaturesTab:AddButton({
-    Name = "Copy Current Job ID",
-    Callback = function()
-        setclipboard(game.JobId)
-        OrionLib:MakeNotification({
-            Name = "Copied!",
-            Content = "Job ID đã được copy",
-            Time = 3
-        })
-    end
-})
-
-FeaturesTab:AddButton({
-    Name = "Hide Name (Client)",
-    Callback = function()
-        pcall(function()
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/isaberjan420/Roblox/refs/heads/main/Slap%20Battles/NameHider"))()
-        end)
-    end
-})
-
--- ====================== FARM ======================
-local farmscripts = {
-    ["Slapple Farm"] = "https://raw.githubusercontent.com/Skzuppy/forge-hub/refs/heads/main/slapfarm_slapple",
-    ["Snow Slap Farm"] = "https://raw.githubusercontent.com/IncognitoScripts/SlapBattles/refs/heads/main/SnowFarm",
-    ["Get Bob (need replica)"] = "https://raw.githubusercontent.com/TheWExploiter/Slap-Battles-TP/refs/heads/main/bobfarm.lua"
+-- Danh sách map + chú thích tiếng Việt
+local places = {
+    {
+        name = "Main Slap Battles",
+        id = 6403373529,
+        note = "Map chính. Farm slap, lấy hầu hết găng cơ bản. Phong cảnh: đảo xanh, nhiều khu vực chiến đấu."
+    },
+    {
+        name = "No One Shot Gloves",
+        id = 9015014224,
+        note = "Chế độ không găng one-shot. An toàn hơn để luyện. Phong cảnh giống map chính."
+    },
+    {
+        name = "Killstreak Only",
+        id = 11520107397,
+        note = "Chỉ dùng găng Killstreak. Luyện combo kill. Phong cảnh arena riêng."
+    },
+    {
+        name = "Slap Royale",
+        id = 9431156611,
+        note = "Chế độ Battle Royale. Loot, storm, lấy găng Royale. Phong cảnh đảo lớn, nhiều khu vực."
+    },
+    {
+        name = "Slap Royale Matchmaking",
+        id = 9426795465,
+        note = "Phòng chờ vào Slap Royale. Đợi đủ người rồi bắt đầu."
+    },
+    {
+        name = "Eternal BOB (Dark Realm)",
+        id = 13833961666,
+        note = "Boss Eternal BOB → lấy găng Rob + badge. Cần team 4 người. Phong cảnh: thế giới tối, đá lớn, thiên thạch."
+    },
+    {
+        name = "Null Zone",
+        id = 14422118326,
+        note = "Lấy găng Null + Tinkerer. Vào qua portal bob + rob. Phong cảnh: không gian tím tối, platform lơ lửng."
+    },
+    {
+        name = "Barzil",
+        id = 7234087065,
+        note = "Map Brazil. Nhiều găng ẩn + badge. Phong cảnh: rừng, nhà, cờ Brazil, khu vực nhiệt đới."
+    },
+    {
+        name = "Evil Barzil",
+        id = 80420091630966,
+        note = "Phiên bản tối của Barzil. Găng + badge khó hơn. Phong cảnh tối, hung bạo hơn."
+    },
+    {
+        name = "Elude Maze",
+        id = 11828384869,
+        note = "Lấy Elude, Counter, Pan. Mê cung + Pim đuổi. Phong cảnh: mê cung tối, tường cao."
+    },
+    {
+        name = "Ice Trials",
+        id = 17290438723,
+        note = "Thử thách băng. Lấy găng liên quan băng/lạnh. Phong cảnh: núi tuyết, băng trơn."
+    },
+    {
+        name = "TOH (Tower of Hell)",
+        id = 115782629143468,
+        note = "Phong cách Tower of Hell. Lấy găng TOH. Phong cảnh: tháp cao, stage nhảy."
+    },
+    {
+        name = "Suction Trials",
+        id = 89837553336708,
+        note = "Thử thách hút. Lấy găng Suction. Phong cảnh: khu vực hút mạnh, platform."
+    },
+    {
+        name = "Shattered Reality",
+        id = 75803343514634,
+        note = "Map thực tại vỡ. Lấy găng ẩn. Phong cảnh: vỡ nát, hiệu ứng glitch."
+    },
+    {
+        name = "Bind Maze",
+        id = 74169485398268,
+        note = "Mê cung Bind. Lấy găng Bind. Phong cảnh: mê cung tối, đường hẹp."
+    },
+    {
+        name = "Hexagon",
+        id = 98726100529621,
+        note = "Map hình lục giác. Lấy găng Hexa. Phong cảnh: cấu trúc lục giác nổi."
+    },
+    {
+        name = "SFOTH (Sword Fight)",
+        id = 117232463555132,
+        note = "Sword Fight on The Heights. Lấy găng liên quan. Phong cảnh: tháp cổ điển Roblox."
+    },
+    {
+        name = "Collect My Pages (Slender)",
+        id = 132277598079047,
+        note = "Lấy găng Slender + badge Collect My Pages. Phong cảnh: trang trại tối, Slenderman đuổi."
+    },
+    {
+        name = "Eggler Server",
+        id = 129665246576996,
+        note = "Map lấy găng Eggler (cần quest trước). Phong cảnh: khu vực trứng/easter."
+    },
+    {
+        name = "The Plate",
+        id = 106620300132058,
+        note = "Map đĩa lớn. Phong cảnh: platform tròn nổi trên không."
+    },
 }
 
-for name, link in pairs(farmscripts) do
-    FarmTab:AddButton({
-        Name = name,
-        Callback = function()
-            local success, err = pcall(function()
-                loadstring(game:HttpGet(link))()
-            end)
-            if not success then
-                OrionLib:MakeNotification({
-                    Name = "Lỗi",
-                    Content = name .. " đã chết hoặc lỗi",
-                    Time = 3
-                })
-            end
-        end
-    })
-end
+-- ====================== TẠO GUI ======================
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "SB_PlaceTP"
+screenGui.ResetOnSpawn = false
+screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+screenGui.Parent = playerGui
 
--- ====================== TROLL ======================
-TrollTab:AddButton({
-    Name = "Fling Gui V1",
-    Callback = function()
-        pcall(function()
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/TheWExploiter/FlingGuiV1/refs/heads/main/FlingGUIV1.lua"))()
+-- Nút mở cửa sổ (luôn hiện)
+local openBtn = Instance.new("TextButton")
+openBtn.Name = "OpenBtn"
+openBtn.Size = UDim2.new(0, 120, 0, 36)
+openBtn.Position = UDim2.new(0, 20, 0.5, -18)
+openBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+openBtn.Text = "📍 Mở Map TP"
+openBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+openBtn.TextSize = 14
+openBtn.Font = Enum.Font.GothamBold
+openBtn.BorderSizePixel = 0
+openBtn.Parent = screenGui
+
+local openCorner = Instance.new("UICorner")
+openCorner.CornerRadius = UDim.new(0, 8)
+openCorner.Parent = openBtn
+
+local openStroke = Instance.new("UIStroke")
+openStroke.Color = Color3.fromRGB(80, 140, 255)
+openStroke.Thickness = 2
+openStroke.Parent = openBtn
+
+-- Cửa sổ chính
+local mainFrame = Instance.new("Frame")
+mainFrame.Name = "MainFrame"
+mainFrame.Size = UDim2.new(0, 380, 0, 480)
+mainFrame.Position = UDim2.new(0.5, -190, 0.5, -240)
+mainFrame.BackgroundColor3 = Color3.fromRGB(22, 22, 28)
+mainFrame.BorderSizePixel = 0
+mainFrame.Visible = false
+mainFrame.Parent = screenGui
+
+local mainCorner = Instance.new("UICorner")
+mainCorner.CornerRadius = UDim.new(0, 12)
+mainCorner.Parent = mainFrame
+
+local mainStroke = Instance.new("UIStroke")
+mainStroke.Color = Color3.fromRGB(60, 100, 200)
+mainStroke.Thickness = 2
+mainStroke.Parent = mainFrame
+
+-- Thanh tiêu đề
+local titleBar = Instance.new("Frame")
+titleBar.Name = "TitleBar"
+titleBar.Size = UDim2.new(1, 0, 0, 42)
+titleBar.BackgroundColor3 = Color3.fromRGB(30, 35, 50)
+titleBar.BorderSizePixel = 0
+titleBar.Parent = mainFrame
+
+local titleCorner = Instance.new("UICorner")
+titleCorner.CornerRadius = UDim.new(0, 12)
+titleCorner.Parent = titleBar
+
+-- Che góc dưới titleBar
+local titleFix = Instance.new("Frame")
+titleFix.Size = UDim2.new(1, 0, 0, 12)
+titleFix.Position = UDim2.new(0, 0, 1, -12)
+titleFix.BackgroundColor3 = Color3.fromRGB(30, 35, 50)
+titleFix.BorderSizePixel = 0
+titleFix.Parent = titleBar
+
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Size = UDim2.new(1, -90, 1, 0)
+titleLabel.Position = UDim2.new(0, 14, 0, 0)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Text = "🗺️ Slap Battles - Dịch chuyển Map"
+titleLabel.TextColor3 = Color3.fromRGB(230, 230, 255)
+titleLabel.TextSize = 15
+titleLabel.Font = Enum.Font.GothamBold
+titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+titleLabel.Parent = titleBar
+
+-- Nút thu nhỏ
+local minBtn = Instance.new("TextButton")
+minBtn.Name = "Minimize"
+minBtn.Size = UDim2.new(0, 32, 0, 28)
+minBtn.Position = UDim2.new(1, -72, 0.5, -14)
+minBtn.BackgroundColor3 = Color3.fromRGB(50, 55, 70)
+minBtn.Text = "—"
+minBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+minBtn.TextSize = 16
+minBtn.Font = Enum.Font.GothamBold
+minBtn.BorderSizePixel = 0
+minBtn.Parent = titleBar
+
+local minCorner = Instance.new("UICorner")
+minCorner.CornerRadius = UDim.new(0, 6)
+minCorner.Parent = minBtn
+
+-- Nút đóng
+local closeBtn = Instance.new("TextButton")
+closeBtn.Name = "Close"
+closeBtn.Size = UDim2.new(0, 32, 0, 28)
+closeBtn.Position = UDim2.new(1, -36, 0.5, -14)
+closeBtn.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
+closeBtn.Text = "✕"
+closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeBtn.TextSize = 14
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.BorderSizePixel = 0
+closeBtn.Parent = titleBar
+
+local closeCorner = Instance.new("UICorner")
+closeCorner.CornerRadius = UDim.new(0, 6)
+closeCorner.Parent = closeBtn
+
+-- Scroll frame chứa nút map
+local scroll = Instance.new("ScrollingFrame")
+scroll.Name = "Scroll"
+scroll.Size = UDim2.new(1, -16, 1, -54)
+scroll.Position = UDim2.new(0, 8, 0, 48)
+scroll.BackgroundTransparency = 1
+scroll.BorderSizePixel = 0
+scroll.ScrollBarThickness = 5
+scroll.ScrollBarImageColor3 = Color3.fromRGB(80, 120, 220)
+scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+scroll.Parent = mainFrame
+
+local listLayout = Instance.new("UIListLayout")
+listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+listLayout.Padding = UDim.new(0, 8)
+listLayout.Parent = scroll
+
+local listPadding = Instance.new("UIPadding")
+listPadding.PaddingTop = UDim.new(0, 4)
+listPadding.PaddingBottom = UDim.new(0, 8)
+listPadding.PaddingLeft = UDim.new(0, 2)
+listPadding.PaddingRight = UDim.new(0, 6)
+listPadding.Parent = scroll
+
+-- Tạo từng nút map
+for i, data in ipairs(places) do
+    local btnFrame = Instance.new("Frame")
+    btnFrame.Name = data.name
+    btnFrame.Size = UDim2.new(1, -4, 0, 0)
+    btnFrame.AutomaticSize = Enum.AutomaticSize.Y
+    btnFrame.BackgroundColor3 = Color3.fromRGB(32, 34, 48)
+    btnFrame.BorderSizePixel = 0
+    btnFrame.LayoutOrder = i
+    btnFrame.Parent = scroll
+
+    local btnCorner = Instance.new("UICorner")
+    btnCorner.CornerRadius = UDim.new(0, 8)
+    btnCorner.Parent = btnFrame
+
+    -- Viền màu cho mỗi nút
+    local btnStroke = Instance.new("UIStroke")
+    btnStroke.Color = Color3.fromRGB(70, 110, 200)
+    btnStroke.Thickness = 1.5
+    btnStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    btnStroke.Parent = btnFrame
+
+    local btnPadding = Instance.new("UIPadding")
+    btnPadding.PaddingTop = UDim.new(0, 8)
+    btnPadding.PaddingBottom = UDim.new(0, 8)
+    btnPadding.PaddingLeft = UDim.new(0, 10)
+    btnPadding.PaddingRight = UDim.new(0, 10)
+    btnPadding.Parent = btnFrame
+
+    local innerLayout = Instance.new("UIListLayout")
+    innerLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    innerLayout.Padding = UDim.new(0, 4)
+    innerLayout.Parent = btnFrame
+
+    -- Tên map (nút bấm)
+    local nameBtn = Instance.new("TextButton")
+    nameBtn.Name = "TP"
+    nameBtn.Size = UDim2.new(1, 0, 0, 26)
+    nameBtn.BackgroundColor3 = Color3.fromRGB(45, 55, 90)
+    nameBtn.Text = "  " .. data.name
+    nameBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    nameBtn.TextSize = 14
+    nameBtn.Font = Enum.Font.GothamBold
+    nameBtn.TextXAlignment = Enum.TextXAlignment.Left
+    nameBtn.BorderSizePixel = 0
+    nameBtn.AutoButtonColor = true
+    nameBtn.Parent = btnFrame
+
+    local nameCorner = Instance.new("UICorner")
+    nameCorner.CornerRadius = UDim.new(0, 6)
+    nameCorner.Parent = nameBtn
+
+    -- Chú thích tiếng Việt
+    local noteLabel = Instance.new("TextLabel")
+    noteLabel.Name = "Note"
+    noteLabel.Size = UDim2.new(1, 0, 0, 0)
+    noteLabel.AutomaticSize = Enum.AutomaticSize.Y
+    noteLabel.BackgroundTransparency = 1
+    noteLabel.Text = data.note
+    noteLabel.TextColor3 = Color3.fromRGB(180, 185, 210)
+    noteLabel.TextSize = 12
+    noteLabel.Font = Enum.Font.Gotham
+    noteLabel.TextXAlignment = Enum.TextXAlignment.Left
+    noteLabel.TextYAlignment = Enum.TextYAlignment.Top
+    noteLabel.TextWrapped = true
+    noteLabel.Parent = btnFrame
+
+    -- Sự kiện teleport
+    nameBtn.MouseButton1Click:Connect(function()
+        local success, err = pcall(function()
+            TeleportService:Teleport(data.id, player)
         end)
-    end
-})
-
--- ====================== COMBAT ======================
-local slapAuraStopper
-
-CombatTab:AddToggle({
-    Name = "Slap Aura",
-    Default = false,
-    Callback = function(state)
-        if state then
-            local success, result = pcall(function()
-                return loadstring(game:HttpGet("https://raw.githubusercontent.com/TheWExploiter/Slap-Battles-TP/refs/heads/main/slapaura.lua"))()
+        if not success then
+            nameBtn.Text = "  ❌ Lỗi / Không vào được"
+            task.delay(2, function()
+                nameBtn.Text = "  " .. data.name
             end)
-            if success then
-                slapAuraStopper = result
-            else
-                OrionLib:MakeNotification({
-                    Name = "Lỗi",
-                    Content = "Slap Aura script đã chết",
-                    Time = 3
-                })
-            end
         else
-            if slapAuraStopper then
-                pcall(slapAuraStopper)
-            end
+            nameBtn.Text = "  ⏳ Đang dịch chuyển..."
         end
-    end
-})
+    end)
 
--- ====================== TELEPORTS ======================
-local function teleportTo(x, y, z)
-    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-        player.Character.HumanoidRootPart.CFrame = CFrame.new(x, y, z)
-    end
+    -- Hover effect
+    nameBtn.MouseEnter:Connect(function()
+        TweenService:Create(nameBtn, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(60, 90, 160)}):Play()
+        TweenService:Create(btnStroke, TweenInfo.new(0.15), {Color = Color3.fromRGB(100, 160, 255)}):Play()
+    end)
+    nameBtn.MouseLeave:Connect(function()
+        TweenService:Create(nameBtn, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(45, 55, 90)}):Play()
+        TweenService:Create(btnStroke, TweenInfo.new(0.15), {Color = Color3.fromRGB(70, 110, 200)}):Play()
+    end)
 end
 
-TeleportsTab:AddButton({Name = "Normal Arena", Callback = function() teleportTo(-14, 66, -1) end})
-TeleportsTab:AddButton({Name = "Slapple Island", Callback = function() teleportTo(-395, 51, -13) end})
-TeleportsTab:AddButton({Name = "Cannon Island", Callback = function() teleportTo(263, 33, 197) end})
-TeleportsTab:AddButton({Name = "Guide Room (Inside)", Callback = function() teleportTo(17894, -130, -3542) end})
-TeleportsTab:AddButton({Name = "Guide Room (Outside)", Callback = function() teleportTo(17938, -130, -3598) end})
-TeleportsTab:AddButton({Name = "New Arena", Callback = function() teleportTo(3419, 260, -18) end})
-TeleportsTab:AddButton({Name = "Void Platform", Callback = function() teleportTo(-34919, -2593, -18) end})
+-- ====================== CHỨC NĂNG MỞ / THU NHỎ / ĐÓNG ======================
+local isOpen = false
 
-TeleportsTab:AddTextbox({
-    Name = "Teleport to Player",
-    Default = "",
-    TextDisappear = true,
-    Callback = function(value)
-        local target = Players:FindFirstChild(value)
-        if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
-            player.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame
-        end
+local function showWindow()
+    mainFrame.Visible = true
+    openBtn.Visible = false
+    isOpen = true
+    mainFrame.Size = UDim2.new(0, 380, 0, 0)
+    TweenService:Create(mainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+        Size = UDim2.new(0, 380, 0, 480)
+    }):Play()
+end
+
+local function hideWindow()
+    local tw = TweenService:Create(mainFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+        Size = UDim2.new(0, 380, 0, 0)
+    })
+    tw:Play()
+    tw.Completed:Connect(function()
+        mainFrame.Visible = false
+        openBtn.Visible = true
+        isOpen = false
+    end)
+end
+
+openBtn.MouseButton1Click:Connect(showWindow)
+minBtn.MouseButton1Click:Connect(hideWindow)
+closeBtn.MouseButton1Click:Connect(hideWindow)
+
+-- Kéo cửa sổ bằng titleBar
+local dragging = false
+local dragStart, startPos
+
+titleBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = mainFrame.Position
     end
-})
+end)
 
--- ====================== CREDITS & CHANGELOG ======================
-CreditsTab:AddParagraph("Made By : ImCatTrust! (TheEpicGamer16Yt)")
-CreditsTab:AddParagraph("Get Glove Scripts By : Nexer1234!")
-CreditsTab:AddParagraph("Some Scripts By : Celerity!")
-CreditsTab:AddParagraph("Cleaned version - removed broken dependencies")
+UserInputService.InputChanged:Connect(function(input)
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - dragStart
+        mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
 
-ChangeLogTab:AddParagraph("Cleaned: Removed testRun.lua + BypassAntiCheat (404)")
-ChangeLogTab:AddParagraph("Added pcall protection for dead glove/farm scripts")
-ChangeLogTab:AddParagraph("Original V2.8 features kept")
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = false
+    end
+end)
 
-OrionLib:Init()
-print("✅ Slap Battles Multi Script (Cleaned) loaded")
+print("✅ Slap Battles Place TP GUI đã load - bấm nút 'Mở Map TP' để mở cửa sổ")
