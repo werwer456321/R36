@@ -1,176 +1,246 @@
---Hướng dẫn Sao chép và dán vào trình soạn thảo kịch bản,
---Hãy điền hai cái tên vào ô "TÊN CỦA BẠN" và "NẠN NHÂN" (Một trong hai không nhất thiết phải là bạn)
+-- Slap Battles Multi Script (Cleaned V2.8)
+-- Đã loại bỏ testRun + BypassAntiCheat bị chết
 
---Đoạn mã này tạo ra hai người chơi trong trò chơi của bạn... Ừm... chắc tiêu đề đã nói lên tất cả rồi ;D
+local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/jensonhirst/Orion/main/source"))()
 
-----------------------------------------------------------------------------------------
-hàm fWeld(zName, zParent, zPart0, zPart1, zCoco, a, b, c, d, e, f)
-local funcw = Instance.new("Weld")
-funcw.Name = zName
-funcw.Parent = zParent
-funcw.Part0 = zPart0
-funcw.Part1 = zPart1
-nếu (zCoco == true) thì
-funcw.C0 = CFrame.new(a, b, c) * CFrame.fromEulerAnglesXYZ(d, e, f)
-khác
-funcw.C1 = CFrame.new(a, b, c) * CFrame.fromEulerAnglesXYZ(d, e, f)
-kết thúc
-trả về hàm
-kết thúc
-hàm fun(n1, n2)
-pcall(function()
-t1 = game.Players[n1].Character.Torso
-t2 = game.Players[n2].Character.Torso
-t2.Parent.Humanoid.PlatformStand = true
-t1["Vai trái"]:Xóa()
-ls1 = Instance.new("Weld")
-ls1.Parent = t1
-ls1.Part0 = t1
-ls1.Part1 = t1.Parent["Cánh tay trái"]
-ls1.C0 = CFrame.new(-1.5,0,0)
-ls1.Name = "Vai trái"
-t1["Vai phải"]:Xóa()
-rs1 = Instance.new("Weld")
-rs1.Parent = t1
-rs1.Part0 = t1
-rs1.Part1 = t1.Parent["Right Arm"]
-rs1.C0 = CFrame.new(1.5,0,0)
-rs1.Name = "Vai phải"
-t2["Vai trái"]:Xóa()
-ls2 = Instance.new("Weld")
-ls2.Parent = t2
-ls2.Part0 = t2
-ls2.Part1 = t2.Parent["Left Arm"]
-ls2.C0 = CFrame.new(-1.5,0,0)
-ls2.Name = "Vai trái"
-t2["Vai phải"]:Xóa()
-rs2 = Instance.new("Weld")
-rs2.Parent = t2
-rs2.Part0 = t2
-rs2.Part1 = t2.Parent["Right Arm"]
-rs2.C0 = CFrame.new(1.5,0,0)
-rs2.Name = "Vai phải"
-t2["Hông trái"]:Xóa()
-lh2 = Instance.new("Weld")
-lh2.Parent = t2
-lh2.Phần 0 = t2
-lh2.Part1 = t2.Parent["Left Leg"]
-lh2.C0 = CFrame.new(-0.5,-2,0)
-lh2.Name = "Hông trái"
-t2["Hông phải"]:Xóa()
-rh2 = Instance.new("Weld")
-rh2.Parent = t2
-rh2.Phần 0 = t2
-rh2.Part1 = t2.Parent["Chân phải"]
-rh2.C0 = CFrame.new(0.5,-2,0)
-rh2.Name = "Hông phải"
-local d = Instance.new("Part")
-d.TopSurface = 0
-d.BottomSurface = 0
-d.CanCollide = false
-d.BrickColor = BrickColor.new("Medium stone grey")
-d. Hình dạng = "Quả cầu"
-d.Cha mẹ = t1
-d.Size = Vector3.new(1,1,1)
-local dm = Instance.new("SpecialMesh")
-dm.MeshType = "Sphere"
-dm.Parent = d
-dm.Scale = Vector3.new(0.4,0.4,0.4)
-fWeld("weld",t1,t1,d,true,-0.2,-1.3,-0.6,0,0,0)
-d2 = d:Clone()
-d2.Cha mẹ = t1
-fWeld("weld",t1,t1,d2,true,0.2,-1.3,-0.6,0,0,0)
-local c = Instance.new("Part")
-c.TopSurface = 0
-c.BottomSurface = 0
-c.CanCollide = false
-c.BrickColor = BrickColor.new("Nâu nhạt")
-c.Cha mẹ = t1
-c.formFactor = "Tùy chỉnh"
-c.Size = Vector3.new(0.4,1.3,0.4)
-cm = Instance.new("CylinderMesh")
-cm.Cha = c
-a = fWeld("weld",t1,t1,c,true,0,-1,-0.52+(-c.Size.y/2),math.rad(-80),0,0)
-c2 = d:Clone()
-c2.BrickColor = BrickColor.new("Medium stone grey")
-c2.Mesh.Scale = Vector3.new(0.4,0.62,0.4)
-c2.Cha mẹ = t1
-fWeld("weld",c,c,c2,true,0,0+(c.Size.y/2),0,math.rad(-10),0,0)
-local bl = Instance.new("Part")
-bl.TopSurface = 0
-bl.BottomSurface = 0
-bl.CanCollide = false
-bl.BrickColor = BrickColor.new("Nâu nhạt")
-bl.Shape = "Ball"
-bl.Parent = t2
-bl.Size = Vector3.new(1,1,1)
-local dm = Instance.new("SpecialMesh")
-dm.MeshType = "Sphere"
-dm.Parent = bl
-dm.Scale = Vector3.new(1.2,1.2,1.2)
-fWeld("weld",t2,t2,bl,true,-0.5,0.5,-0.6,0,0,0)
-local br = Instance.new("Part")
-br.TopSurface = 0
-br.BottomSurface = 0
-br.CanCollide = false
-br.BrickColor = BrickColor.new("Nâu nhạt")
-br.Shape = "Ball"
-br.Parent = t2
-br.Size = Vector3.new(1,1,1)
-local dm = Instance.new("SpecialMesh")
-dm.MeshType = "Sphere"
-dm.Parent = br
-dm.Scale = Vector3.new(1.2,1.2,1.2)
-fWeld("weld",t2,t2,br,true,0.5,0.5,-0.6,0,0,0)
-local bln = Instance.new("Part")
-bln.TopSurface = 0
-bln.BottomSurface = 0
-bln.CanCollide = false
-bln.Shape = "Ball"
-bln.Parent = t2
-bln.Size = Vector3.new(1,1,1)
-local dm = Instance.new("SpecialMesh")
-dm.MeshType = "Sphere"
-dm.Parent = bln
-dm.Scale = Vector3.new(0.2,0.2,0.2)
-fWeld("weld",t2,t2,bln,true,-0.5,0.5,-1.2,0,0,0)
-local brn = Instance.new("Part")
-brn.TopSurface = 0
-brn.BottomSurface = 0
-brn.CanCollide = false
-brn.Shape = "Ball"
-brn.Parent = t2
-brn.Size = Vector3.new(1,1,1)
-local dm = Instance.new("SpecialMesh")
-dm.MeshType = "Sphere"
-dm.Parent = brn
-dm.Scale = Vector3.new(0.2,0.2,0.2)
-fWeld("weld",t2,t2,brn,true,0.5,0.5,-1.2,0,0,0)
-lh2.C1 = CFrame.new(0,-1.5,-0.5) * CFrame.Angles(0.9,-0.4,0)
-rh2.C1 = CFrame.new(0,-1.5,-0.5) * CFrame.Angles(0.9,0.4,0)
-ls2.C1 = CFrame.new(-0.5,-1.3,-0.5) * CFrame.Angles(0.9,-0.4,0)
-rs2.C1 = CFrame.new(0.5,-1.3,-0.5) * CFrame.Angles(0.9,0.4,0)
-ls1.C1 = CFrame.new(-0.5,0.7,0) * CFrame.Angles(-0.9,-0.4,0)
-rs1.C1 = CFrame.new(0.5,0.7,0) * CFrame.Angles(-0.9,0.4,0)
-nếu t1:findFirstChild("weldx") ~= nil thì
-t1.weldx:Remove()
-kết thúc
-we = fWeld("weldx", t1, t1, t2, true, 0, -0.9, -1.3, math.rad(-90), 0, 0)
-n = t2.Cổ
-n.C0 = CFrame.new(0, 1.5, 0) * CFrame.Angles(math.rad(-210), math.rad(180), 0)
-kết thúc)
-coroutine.resume(coroutine.create(function()
-trong khi chờ() thực hiện
-for i = 1,6 do
-we.C1 = we.C1 * CFrame.new(0,-0.3,0)
-Chờ đợi()
-kết thúc
+local Window = OrionLib:MakeWindow({
+    Name = "Slap Battles Multi Script (Cleaned)",
+    HidePremium = false,
+    SaveConfig = true,
+    ConfigFolder = "TeleportConfig",
+    IntroEnabled = true,
+    IntroText = "Slap Battles Multi Script",
+    CloseCallback = function() end
+})
 
-for i = 1,6 do
-we.C1 = we.C1 * CFrame.new(0,0.3,0)
-Chờ đợi()
-kết thúc
-kết thúc
-kết thúc))
-kết thúc
-vui vẻ ("Wolfwv", "s3xycoolgirl")
+local Players = game:GetService("Players")
+local TeleportService = game:GetService("TeleportService")
+local player = Players.LocalPlayer
+local username = player.Name
+local jobIdInput = ""
+
+-- Tabs
+local HomeTab = Window:MakeTab({Name = "Home", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+local TeleportsTab = Window:MakeTab({Name = "Teleports", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+local FeaturesTab = Window:MakeTab({Name = "Features", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+local GlovesTab = Window:MakeTab({Name = "Gloves", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+local TrollTab = Window:MakeTab({Name = "Troll Stuff", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+local FarmTab = Window:MakeTab({Name = "Farm Scripts", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+local CombatTab = Window:MakeTab({Name = "Combat", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+local ChangeLogTab = Window:MakeTab({Name = "Changelogs", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+local CreditsTab = Window:MakeTab({Name = "Credits", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+
+HomeTab:AddSection({Name = "Welcome, " .. username .. "!"})
+TeleportsTab:AddSection({Name = "Teleports"})
+FeaturesTab:AddSection({Name = "Useful Features"})
+GlovesTab:AddSection({Name = "Auto Get Gloves"})
+TrollTab:AddSection({Name = "Troll Scripts"})
+FarmTab:AddSection({Name = "Farm Scripts"})
+CombatTab:AddSection({Name = "Combat"})
+ChangeLogTab:AddSection({Name = "Update Changelogs"})
+CreditsTab:AddSection({Name = "Credits"})
+
+-- ====================== GLOVES ======================
+local gloveScripts = {
+    ["Boxer Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/BoxerGlove.luau",
+    ["Clock Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/ClockGlove.luau",
+    ["Counter Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/CounterGlove.luau",
+    ["Elude Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/EludeGlove.luau",
+    ["Fan Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/FanGlove.luau",
+    ["Mouse Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/MouseGlove.luau",
+    ["Bind Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/BindGlove.luau",
+    ["Water Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/WaterGlove.luau",
+    ["Trap Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/TrapGlove.luau",
+    ["Hexa Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/HexaGlove.luau",
+    ["Hybrid Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/HybridGlove.luau",
+    ["Hunter Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/HunterGlove.luau",
+    ["Relude Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/ReludeGlove.luau",
+    ["Avatar & Hunter Gloves"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/AvatarAndHunterGloves.luau",
+    ["Avatar & Relude Gloves"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/AvatarAndReludeGloves.luau",
+    ["Metaverse Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/MetaverseGlove.luau",
+    ["Frostbite Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/FrostbiteGlove.luau",
+    ["Elude & Counter Gloves"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/EludeAndCounterGloves.luau",
+    ["Fan & Boxer Gloves"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/FanAndBoxerGloves.luau",
+    ["RNG Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/RNGGlove.luau",
+    ["Hitman Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/HitmanGlove.luau",
+    ["Bob Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/BobGlove.luau",
+    ["Kinetic Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/KineticGlove.luau",
+    ["Admin Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/AdminGlove.luau",
+    ["Sword Fighter Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/SwordfigterGlove.luau",
+    ["Eggler Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/EgglerGlove.luau",
+    ["UTG Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/UTGGlove.luau",
+    ["[REDACTED] Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/REDACTEDGlove.luau",
+    ["Link Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/LinkGlove.luau",
+    ["Chain Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/ChainGlove.luau",
+    ["Lamp Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/LampGlove.luau",
+    ["IceSkate Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/IceSkateGlove.luau",
+    ["Glovel Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/GlovelGlove.luau",
+    ["Knockoff Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/KnockoffGlove.luau",
+    ["Alchemist Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/AlchemistGlove.luau",
+    ["Buddies Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/BuddiesGlove.luau",
+    ["Angler Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/AnglerGlove.luau",
+    ["Spoonful Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/SpoonfulGlove.luau",
+    ["Voodoo Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/VoodooGlove.luau",
+    ["Fish Glove"] = "https://raw.githubusercontent.com/Pro666Pro/OpenSourceScripts/refs/heads/main/Gloves/FishGlove.luau"
+}
+
+for name, link in pairs(gloveScripts) do
+    GlovesTab:AddButton({
+        Name = name,
+        Callback = function()
+            local success, err = pcall(function()
+                loadstring(game:HttpGet(link))()
+            end)
+            if not success then
+                OrionLib:MakeNotification({
+                    Name = "Lỗi",
+                    Content = name .. " đã chết hoặc lỗi",
+                    Time = 3
+                })
+            end
+        end
+    })
+end
+
+-- ====================== FEATURES ======================
+FeaturesTab:AddTextbox({
+    Name = "Join Job ID",
+    Default = "",
+    TextDisappear = false,
+    Callback = function(Value)
+        jobIdInput = Value
+    end
+})
+
+FeaturesTab:AddButton({
+    Name = "Join Server with Job ID",
+    Callback = function()
+        if jobIdInput and jobIdInput \~= "" then
+            TeleportService:TeleportToPlaceInstance(game.PlaceId, jobIdInput, player)
+        end
+    end
+})
+
+FeaturesTab:AddButton({
+    Name = "Copy Current Job ID",
+    Callback = function()
+        setclipboard(game.JobId)
+        OrionLib:MakeNotification({
+            Name = "Copied!",
+            Content = "Job ID đã được copy",
+            Time = 3
+        })
+    end
+})
+
+FeaturesTab:AddButton({
+    Name = "Hide Name (Client)",
+    Callback = function()
+        pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/isaberjan420/Roblox/refs/heads/main/Slap%20Battles/NameHider"))()
+        end)
+    end
+})
+
+-- ====================== FARM ======================
+local farmscripts = {
+    ["Slapple Farm"] = "https://raw.githubusercontent.com/Skzuppy/forge-hub/refs/heads/main/slapfarm_slapple",
+    ["Snow Slap Farm"] = "https://raw.githubusercontent.com/IncognitoScripts/SlapBattles/refs/heads/main/SnowFarm",
+    ["Get Bob (need replica)"] = "https://raw.githubusercontent.com/TheWExploiter/Slap-Battles-TP/refs/heads/main/bobfarm.lua"
+}
+
+for name, link in pairs(farmscripts) do
+    FarmTab:AddButton({
+        Name = name,
+        Callback = function()
+            local success, err = pcall(function()
+                loadstring(game:HttpGet(link))()
+            end)
+            if not success then
+                OrionLib:MakeNotification({
+                    Name = "Lỗi",
+                    Content = name .. " đã chết hoặc lỗi",
+                    Time = 3
+                })
+            end
+        end
+    })
+end
+
+-- ====================== TROLL ======================
+TrollTab:AddButton({
+    Name = "Fling Gui V1",
+    Callback = function()
+        pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/TheWExploiter/FlingGuiV1/refs/heads/main/FlingGUIV1.lua"))()
+        end)
+    end
+})
+
+-- ====================== COMBAT ======================
+local slapAuraStopper
+
+CombatTab:AddToggle({
+    Name = "Slap Aura",
+    Default = false,
+    Callback = function(state)
+        if state then
+            local success, result = pcall(function()
+                return loadstring(game:HttpGet("https://raw.githubusercontent.com/TheWExploiter/Slap-Battles-TP/refs/heads/main/slapaura.lua"))()
+            end)
+            if success then
+                slapAuraStopper = result
+            else
+                OrionLib:MakeNotification({
+                    Name = "Lỗi",
+                    Content = "Slap Aura script đã chết",
+                    Time = 3
+                })
+            end
+        else
+            if slapAuraStopper then
+                pcall(slapAuraStopper)
+            end
+        end
+    end
+})
+
+-- ====================== TELEPORTS ======================
+local function teleportTo(x, y, z)
+    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        player.Character.HumanoidRootPart.CFrame = CFrame.new(x, y, z)
+    end
+end
+
+TeleportsTab:AddButton({Name = "Normal Arena", Callback = function() teleportTo(-14, 66, -1) end})
+TeleportsTab:AddButton({Name = "Slapple Island", Callback = function() teleportTo(-395, 51, -13) end})
+TeleportsTab:AddButton({Name = "Cannon Island", Callback = function() teleportTo(263, 33, 197) end})
+TeleportsTab:AddButton({Name = "Guide Room (Inside)", Callback = function() teleportTo(17894, -130, -3542) end})
+TeleportsTab:AddButton({Name = "Guide Room (Outside)", Callback = function() teleportTo(17938, -130, -3598) end})
+TeleportsTab:AddButton({Name = "New Arena", Callback = function() teleportTo(3419, 260, -18) end})
+TeleportsTab:AddButton({Name = "Void Platform", Callback = function() teleportTo(-34919, -2593, -18) end})
+
+TeleportsTab:AddTextbox({
+    Name = "Teleport to Player",
+    Default = "",
+    TextDisappear = true,
+    Callback = function(value)
+        local target = Players:FindFirstChild(value)
+        if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+            player.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame
+        end
+    end
+})
+
+-- ====================== CREDITS & CHANGELOG ======================
+CreditsTab:AddParagraph("Made By : ImCatTrust! (TheEpicGamer16Yt)")
+CreditsTab:AddParagraph("Get Glove Scripts By : Nexer1234!")
+CreditsTab:AddParagraph("Some Scripts By : Celerity!")
+CreditsTab:AddParagraph("Cleaned version - removed broken dependencies")
+
+ChangeLogTab:AddParagraph("Cleaned: Removed testRun.lua + BypassAntiCheat (404)")
+ChangeLogTab:AddParagraph("Added pcall protection for dead glove/farm scripts")
+ChangeLogTab:AddParagraph("Original V2.8 features kept")
+
+OrionLib:Init()
+print("✅ Slap Battles Multi Script (Cleaned) loaded")
